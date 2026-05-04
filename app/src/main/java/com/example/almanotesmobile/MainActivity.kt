@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import com.example.almanotesmobile.ui.composables.AppBar
+import com.example.almanotesmobile.ui.composables.NavigationBar
 import com.example.almanotesmobile.ui.theme.AlmaNotesMobileTheme
 
 class MainActivity : ComponentActivity() {
@@ -23,11 +24,13 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = { AppBar() }
+
                 ) { innerPadding ->
                     Greeting(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
+                    NavigationBar()
                 }
             }
         }

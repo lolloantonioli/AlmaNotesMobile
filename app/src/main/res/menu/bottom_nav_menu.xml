@@ -1,0 +1,27 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/item_1"
+        android:enabled="true"
+        android:icon="@drawable/logo"
+        android:title="Home"/>
+    <item
+        android:id="@+id/item_2"
+        android:enabled="true"
+        android:icon="@drawable/search"
+        android:title="Cerca"/>
+    <item
+        android:id="@+id/item_3"
+        android:enabled="true"
+        android:icon="@drawable/search"
+        android:title="Cerca"/>
+    <item
+        android:id="@+id/item_4"
+        android:enabled="true"
+        android:icon="@drawable/search"
+        android:title="Cerca"/>
+    <item
+        android:id="@+id/item_5"
+        android:enabled="true"
+        android:icon="@drawable/search"
+        android:title="Cerca"/>
+</menu>
