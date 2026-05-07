@@ -64,7 +64,9 @@ class MainActivity : ComponentActivity() {
                         modifier = Modifier.padding(innerPadding)
                     )
                 }*/
-                ThemeScreen(themeState, themeViewModel.actions)
+                //ThemeScreen(themeState, themeViewModel.actions)
+                RegistrationScreen {
+                }
             }
         }
     }
