@@ -4,6 +4,7 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Scaffold
@@ -11,27 +12,42 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.ui.composables.AppBar
 import com.example.almanotesmobile.ui.composables.NavigationBar
+import com.example.almanotesmobile.ui.screens.ThemeViewModel
 import com.example.almanotesmobile.ui.theme.AlmaNotesMobileTheme
+import org.koin.androidx.compose.koinViewModel
+import androidx.compose.runtime.getValue
+import com.example.almanotesmobile.data.Theme
+import com.example.almanotesmobile.ui.screens.ThemeScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            AlmaNotesMobileTheme {
-                Scaffold(
+            val themeViewModel = koinViewModel<ThemeViewModel>()
+            val themeState by themeViewModel.state.collectAsStateWithLifecycle()
+            AlmaNotesMobileTheme(
+                darkTheme = when (themeState.theme) {
+                    Theme.Light -> false
+                    Theme.Dark -> true
+                    Theme.System -> isSystemInDarkTheme()
+                },
+                dynamicColor = themeState.dynamicColor
+            ) {
+                /*Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    topBar = { AppBar() }
-
+                    topBar = { AppBar() },
+                    bottomBar = { NavigationBar() }
                 ) { innerPadding ->
                     Greeting(
                         name = "Android",
                         modifier = Modifier.padding(innerPadding)
                     )
-                    NavigationBar()
-                }
+                }*/
+                ThemeScreen(themeState, themeViewModel.actions)
             }
         }
     }
