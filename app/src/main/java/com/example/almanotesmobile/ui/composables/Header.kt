@@ -54,7 +54,7 @@ fun AppBar() {
             }
         },
         colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
-            containerColor = Color(0xFFFAFAFA)
+            containerColor = MaterialTheme.colorScheme.surface
         )
     )
 }
