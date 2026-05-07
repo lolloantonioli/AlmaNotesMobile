@@ -20,6 +20,8 @@ import com.example.almanotesmobile.ui.theme.AlmaNotesMobileTheme
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.runtime.getValue
 import com.example.almanotesmobile.data.Theme
+import com.example.almanotesmobile.ui.screens.AuthViewModel
+import com.example.almanotesmobile.ui.screens.RegistrationScreen
 import com.example.almanotesmobile.ui.screens.ThemeScreen
 
 class MainActivity : ComponentActivity() {
@@ -27,6 +29,21 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val authViewModel = koinViewModel<AuthViewModel>()
+            val isRegistered by authViewModel.isRegistered.collectAsStateWithLifecycle(initialValue = null)
+            when (isRegistered) {
+                null -> { /* Schermata bianca o logo di caricamento */ }
+                true -> {
+                    // Vai alla Login o direttamente alla Home
+                }
+                false -> {
+                    RegistrationScreen(
+                        onRegisterSuccess = { username ->
+                            authViewModel.register(username)
+                        }
+                    )
+                }
+            }
             val themeViewModel = koinViewModel<ThemeViewModel>()
             val themeState by themeViewModel.state.collectAsStateWithLifecycle()
             AlmaNotesMobileTheme(
