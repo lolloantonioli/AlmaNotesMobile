@@ -25,8 +25,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.data.Theme
-import com.example.almanotesmobile.ui.composables.AppBar
-import com.example.almanotesmobile.ui.composables.NavigationBar
 import com.example.almanotesmobile.ui.composables.RadioListItem
 
 @Composable
@@ -40,8 +38,6 @@ fun ThemeScreen(
     val almaRed = Color(0xFFBB2E29)
 
     Scaffold(
-        topBar = { AppBar() },
-        bottomBar = { NavigationBar() }
     ) { innerPadding ->
         Column(
             modifier = Modifier
