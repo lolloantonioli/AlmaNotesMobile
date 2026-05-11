@@ -20,14 +20,15 @@ import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
 
 @Composable
-fun RegistrationScreen(
-    onRegisterSuccess: () -> Unit,
-    onNavigateToLogin: () -> Unit,
+fun LoginScreen(
+    onLoginSuccess: () -> Unit,
+    onNavigateToRegister: () -> Unit,
+    onBiometricLogin: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
@@ -41,7 +42,7 @@ fun RegistrationScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 2. Card Centrale (il quadrato FAFAFA)
+        // 2. Card Centrale
         Card(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -66,9 +67,9 @@ fun RegistrationScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Titolo "Registrati"
+                // Titolo "Accedi"
                 Text(
-                    text = "Registrati",
+                    text = "Accedi",
                     fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     color = almaRed,
@@ -76,21 +77,6 @@ fun RegistrationScreen(
                 )
 
                 Spacer(modifier = Modifier.height(24.dp))
-
-                // Campo Username
-                OutlinedTextField(
-                    value = username,
-                    onValueChange = { username = it },
-                    placeholder = { Text("Username") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.LightGray,
-                        unfocusedBorderColor = Color.LightGray
-                    )
-                )
-
-                Spacer(modifier = Modifier.height(8.dp))
 
                 // Campo Email
                 OutlinedTextField(
@@ -122,12 +108,21 @@ fun RegistrationScreen(
                     )
                 )
 
+                if (errorMessage != null) {
+                    Text(
+                        text = errorMessage!!,
+                        color = Color.Red,
+                        fontSize = 12.sp,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Link Accedi
-                TextButton(onClick = onNavigateToLogin) {
+                // Link Registrati
+                TextButton(onClick = onNavigateToRegister) {
                     Text(
-                        text = "Sei già registrato? Accedi qui",
+                        text = "Non sei registrato? registrati qui",
                         color = Color.Black,
                         fontSize = 14.sp,
                         fontWeight = FontWeight.SemiBold
@@ -136,21 +131,35 @@ fun RegistrationScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Bottone Registrati
+                // Bottone Accedi
                 Button(
                     onClick = { 
-                        if (username.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
-                            viewModel.register(username, email, password)
-                            onRegisterSuccess()
+                        viewModel.login(email, password) { success ->
+                            if (success) onLoginSuccess()
+                            else errorMessage = "Email o password errati"
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = almaRed),
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
+                        .height(45.dp),
                     shape = RoundedCornerShape(8.dp)
                 ) {
-                    Text("Registrati", color = Color.White, fontSize = 16.sp)
+                    Text("Accedi", color = Color.White, fontSize = 16.sp)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                // Bottone Biometria
+                Button(
+                    onClick = onBiometricLogin,
+                    colors = ButtonDefaults.buttonColors(containerColor = almaRed.copy(alpha = 0.8f)),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(45.dp),
+                    shape = RoundedCornerShape(8.dp)
+                ) {
+                    Text("Accedi con biometria", color = Color.White, fontSize = 16.sp)
                 }
             }
         }
