@@ -77,7 +77,7 @@ fun RegistrationScreen(onRegisterSuccess: (String) -> Unit) {
                 OutlinedTextField(
                     value = username,
                     onValueChange = { username = it },
-                    placeholder = { Text("Username") },
+                    label = { Text("Username") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -92,7 +92,7 @@ fun RegistrationScreen(onRegisterSuccess: (String) -> Unit) {
                 OutlinedTextField(
                     value = email,
                     onValueChange = { email = it },
-                    placeholder = { Text("Email address") },
+                    label = { Text("Email address") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
@@ -108,7 +108,7 @@ fun RegistrationScreen(onRegisterSuccess: (String) -> Unit) {
                 OutlinedTextField(
                     value = password,
                     onValueChange = { password = it },
-                    placeholder = { Text("Password") },
+                    label = { Text("Password") },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
