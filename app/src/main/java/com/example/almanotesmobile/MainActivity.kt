@@ -102,7 +102,13 @@ class MainActivity : FragmentActivity() {
                         }
 
                         composable<Route.Home> {
-                            Greeting(name = "AlmaNotes Home")
+                            HomeScreen(
+                                onSearchClick = {
+                                    navController.navigate(Route.Search) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            )
                         }
 
                         composable<Route.Search> {

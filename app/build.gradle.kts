@@ -3,6 +3,7 @@ plugins {
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.serialization)
+    alias(libs.plugins.ksp)
 }
 
 android {
@@ -66,4 +67,8 @@ dependencies {
     implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
     implementation("androidx.biometric:biometric:1.1.0")
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+    implementation("androidx.compose.material:material-icons-extended")
 }
