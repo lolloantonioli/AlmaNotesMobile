@@ -11,35 +11,34 @@ import kotlinx.coroutines.launch
 class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
 
     val isRegistered: StateFlow<Boolean?> = repository.isRegistered
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = null
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
     val isLoggedIn: StateFlow<Boolean> = repository.isLoggedIn
-        .stateIn(
-            scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5000),
-            initialValue = false
-        )
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
+    val biometricEnabled: StateFlow<Boolean> = repository.biometricEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun register(username: String, email: String, password: String) {
-        viewModelScope.launch {
-            repository.saveRegistration(username, email, password)
-        }
+        viewModelScope.launch { repository.saveRegistration(username, email, password) }
     }
 
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val success = repository.login(email, password)
+            if (success) repository.setBiometricEnabled(true) // abilita biometria al primo login
+            onResult(success)
+        }
+    }
+
+    fun loginWithBiometric(onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val success = repository.loginWithBiometric()
             onResult(success)
         }
     }
 
     fun logout() {
-        viewModelScope.launch {
-            repository.logout()
-        }
+        viewModelScope.launch { repository.logout() }
     }
 }

@@ -65,4 +65,5 @@ dependencies {
     implementation("io.insert-koin:koin-androidx-compose:4.0.2")
     implementation("androidx.navigation:navigation-compose:2.9.7")
     implementation("io.ktor:ktor-serialization-kotlinx-json:2.3.8")
+    implementation("androidx.biometric:biometric:1.1.0")
 }
