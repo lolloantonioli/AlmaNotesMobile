@@ -53,7 +53,7 @@ fun AppBar(navController: NavController) {
                 restoreState = true
             } }) {
                 Icon(
-                    imageVector = Icons.Default.AccountCircle,
+                    painter = painterResource(R.drawable.theme),
                     contentDescription = "Theme",
                     tint = backgroundColor
                 )
