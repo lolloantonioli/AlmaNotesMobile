@@ -125,6 +125,10 @@ class MainActivity : ComponentActivity() {
                                 themeActions = themeViewModel.actions
                             )
                         }
+
+                        composable<Route.Profile> {
+                            Greeting(name = "Profilo")
+                        }
                     }
                 }
             }
