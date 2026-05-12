@@ -16,6 +16,9 @@ import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -61,6 +64,7 @@ fun HomeScreen(
     onSearchClick: () -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
+    var selectedNote by remember { mutableStateOf<Note?>(null) }
     val topDownloaded  by viewModel.topDownloaded.collectAsStateWithLifecycle()
     val latestUploaded by viewModel.latestUploaded.collectAsStateWithLifecycle()
 
@@ -83,10 +87,9 @@ fun HomeScreen(
         }
         item { Spacer(Modifier.height(10.dp)) }
         item {
-            NoteListCard(
-                notes = topDownloaded,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) { note -> DownloadedNoteRow(note) }
+            NoteListCard(notes = topDownloaded, modifier = Modifier.padding(horizontal = 16.dp)) { note ->
+                DownloadedNoteRow(note = note, onClick = { selectedNote = note })
+            }
         }
 
         item { Spacer(Modifier.height(24.dp)) }
@@ -100,11 +103,20 @@ fun HomeScreen(
         }
         item { Spacer(Modifier.height(10.dp)) }
         item {
-            NoteListCard(
-                notes = latestUploaded,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) { note -> UploadedNoteRow(note) }
+            NoteListCard(notes = latestUploaded, modifier = Modifier.padding(horizontal = 16.dp)) { note ->
+                UploadedNoteRow(note = note, onClick = { selectedNote = note })
+            }
         }
+    }
+    selectedNote?.let { note ->
+        NoteDetailDialog(
+            note = note,
+            onDismiss = { selectedNote = null },
+            onDownload = {
+                viewModel.incrementDownload(note.id)
+                selectedNote = null
+            }
+        )
     }
 }
 
@@ -238,13 +250,13 @@ private fun NoteListCard(
 // ─── Righe delle note ─────────────────────────────────────────────────────────
 
 @Composable
-private fun DownloadedNoteRow(note: Note) {
+private fun DownloadedNoteRow(note: Note, onClick: () -> Unit) {
     val textSecondary = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* TODO: apri nota */ }
+            .clickable { onClick }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top
     ) {
@@ -277,13 +289,13 @@ private fun DownloadedNoteRow(note: Note) {
 }
 
 @Composable
-private fun UploadedNoteRow(note: Note) {
+private fun UploadedNoteRow(note: Note, onClick: () -> Unit) {
     val textSecondary = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.55f)
 
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .clickable { /* TODO: apri nota */ }
+            .clickable { onClick }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.Top
     ) {

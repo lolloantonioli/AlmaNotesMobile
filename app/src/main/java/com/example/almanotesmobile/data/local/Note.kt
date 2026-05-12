@@ -8,11 +8,13 @@ data class Note(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val title: String,
-    val professorName: String,
-    val subject: String,
+    val courseName: String,       // MATERIA  (es. "Analisi Matematica 1")
+    val professorName: String,    // PROFESSORE
+    val subject: String,          // CORSO DI LAUREA
     val filePath: String = "",
     val downloadCount: Int = 0,
     val rating: Float = 0f,
+    val ratingCount: Int = 0,     // numero di voti
     val uploaderName: String,
     val uploadedAt: Long = System.currentTimeMillis()
 )

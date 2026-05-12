@@ -33,7 +33,9 @@ val appModule = module {
             get<Context>().applicationContext,
             NoteDatabase::class.java,
             "almanotes.db"
-        ).build()
+        )
+            .fallbackToDestructiveMigration()
+            .build()
     }
     single { get<NoteDatabase>().noteDao() }
     single { NoteRepository(get()) }

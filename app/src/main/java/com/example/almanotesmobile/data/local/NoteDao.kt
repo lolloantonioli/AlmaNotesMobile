@@ -5,7 +5,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface NoteDao {
-
     @Query("SELECT * FROM notes ORDER BY downloadCount DESC LIMIT :limit")
     fun getTopDownloaded(limit: Int): Flow<List<Note>>
 
@@ -14,6 +13,9 @@ interface NoteDao {
 
     @Query("SELECT COUNT(*) FROM notes")
     suspend fun count(): Int
+
+    @Query("UPDATE notes SET downloadCount = downloadCount + 1 WHERE id = :id")
+    suspend fun incrementDownload(id: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note): Long
