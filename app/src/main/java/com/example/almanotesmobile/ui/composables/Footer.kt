@@ -54,11 +54,11 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 3. PREFERITI
+        // 3. CARICA
         NavigationBarItem(
             icon = {
                 Icon(
-                    painter = painterResource(id = R.drawable.favourites),
+                    painter = painterResource(id = R.drawable.add),
                     contentDescription = "Preferiti",
                     modifier = Modifier.size(24.dp)
                 )
