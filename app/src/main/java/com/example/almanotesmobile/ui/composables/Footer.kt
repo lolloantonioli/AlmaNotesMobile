@@ -96,9 +96,9 @@ fun AlmaNotesFooter(navController: NavController) {
                 )
             },
             label = { Text("Profilo") },
-            selected = currentDestination?.route?.contains("Theme") == true,
+            selected = currentDestination?.route?.contains("Profile") == true,
             onClick = {
-                navController.navigate(Route.Theme) {
+                navController.navigate(Route.Profile) {
                     launchSingleTop = true
                     restoreState = true
                 }

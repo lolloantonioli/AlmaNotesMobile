@@ -7,4 +7,5 @@ sealed interface Route {
     @Serializable data object Register : Route
     @Serializable data object Home : Route
     @Serializable data object Theme : Route
+    @Serializable data object Profile : Route
 }

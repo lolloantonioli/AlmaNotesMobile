@@ -29,4 +29,7 @@ sealed interface Route {
 
     @Serializable
     data object Theme : Route
+
+    @Serializable
+    data object Profile : Route
 }
