@@ -17,9 +17,12 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavController
+import com.example.almanotesmobile.ui.navigation.Route
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar() {
+fun AppBar(navController: NavController) {
     val backgroundColor = Color(0xFFBB2E29)
     val merriweatherSans = FontFamily(
         Font(R.font.merriweathersans_variablefont_wght, FontWeight.Normal),
@@ -45,7 +48,10 @@ fun AppBar() {
             }
         },
         actions = {
-            IconButton(onClick = { /* TODO */ }) {
+            IconButton(onClick = { navController.navigate(Route.Rewards) {
+                launchSingleTop = true
+                restoreState = true
+            } }) {
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = "Theme",

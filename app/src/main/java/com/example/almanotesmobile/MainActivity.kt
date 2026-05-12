@@ -63,7 +63,7 @@ class MainActivity : ComponentActivity() {
                     modifier = Modifier.fillMaxSize(),
                     topBar = { 
                         // Mostriamo la barra solo se loggati (o dove serve)
-                        if (isLoggedIn) AppBar() 
+                        if (isLoggedIn) AppBar(navController = navController)
                     },
                     bottomBar = { 
                         // Mostriamo il footer solo nelle schermate principali
