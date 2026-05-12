@@ -38,7 +38,6 @@ class MainActivity : ComponentActivity() {
 
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val currentRoute = navBackStackEntry?.destination?.route
 
             AlmaNotesMobileTheme(
                 darkTheme = when (themeState.theme) {
@@ -62,7 +61,7 @@ class MainActivity : ComponentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = { 
-                        // Mostriamo la barra solo se loggati (o dove serve)
+                        // Mostriamo la barra solo se loggati
                         if (isLoggedIn) AppBar(navController = navController)
                     },
                     bottomBar = { 
@@ -103,7 +102,6 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable<Route.Home> {
-                            // Placeholder per la Home
                             Greeting(name = "AlmaNotes Home")
                         }
 
@@ -127,7 +125,11 @@ class MainActivity : ComponentActivity() {
                         }
 
                         composable<Route.Profile> {
-                            Greeting(name = "Profilo")
+                            ProfileScreen(
+                                authViewModel = authViewModel,
+                                themeState = themeState,
+                                themeActions = themeViewModel.actions
+                            )
                         }
                     }
                 }
