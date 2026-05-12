@@ -1,5 +1,7 @@
 package com.example.almanotesmobile.ui.screens
 
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -10,6 +12,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,11 +31,21 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 
+// Funzione helper per trovare la FragmentActivity nel contesto di Compose
+fun Context.findFragmentActivity(): FragmentActivity? {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is FragmentActivity) return currentContext
+        currentContext = currentContext.baseContext
+    }
+    return null
+}
+
 @Composable
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onBiometricLogin: () -> Unit,   // mantenuto per compatibilità, non usato direttamente
+    onBiometricLogin: () -> Unit,
     viewModel: AuthViewModel
 ) {
     var email          by remember { mutableStateOf("") }
@@ -44,25 +58,26 @@ fun LoginScreen(
     val almaRed = Color(0xFFBB2E29)
     val cardBg  = Color(0xFFFAFAFA)
 
-    // ── Controlla se la biometria è disponibile sul dispositivo ──────────────
     val biometricAvailable = remember(context) {
         val bm = BiometricManager.from(context)
         bm.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
                 BiometricManager.BIOMETRIC_SUCCESS
     }
 
-    // ── Costruisce e lancia il BiometricPrompt ────────────────────────────────
     fun launchBiometric() {
+        val activity = context.findFragmentActivity()
+        if (activity == null) {
+            errorMessage = "Errore: Impossibile avviare la biometria"
+            return
+        }
+
         val executor = ContextCompat.getMainExecutor(context)
-        val activity = context as FragmentActivity
 
         val prompt = BiometricPrompt(
             activity,
             executor,
             object : BiometricPrompt.AuthenticationCallback() {
-                override fun onAuthenticationSucceeded(
-                    result: BiometricPrompt.AuthenticationResult
-                ) {
+                override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
                     viewModel.loginWithBiometric { success ->
                         if (success) onLoginSuccess()
                         else errorMessage = "Utente non trovato"
@@ -70,7 +85,6 @@ fun LoginScreen(
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    // L'utente ha annullato o c'è stato un errore hardware: non mostriamo errore
                     if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
                         errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
                     ) {
@@ -79,21 +93,20 @@ fun LoginScreen(
                 }
 
                 override fun onAuthenticationFailed() {
-                    errorMessage = "Autenticazione non riconosciuta, riprova"
+                    errorMessage = "Autenticazione fallita"
                 }
             }
         )
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle("Accedi ad AlmaNotes")
-            .setSubtitle("Usa la tua impronta o il riconoscimento facciale")
+            .setSubtitle("Usa l'impronta o il PIN del dispositivo")
             .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
             .build()
 
         prompt.authenticate(promptInfo)
     }
 
-    // ── UI ────────────────────────────────────────────────────────────────────
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.sfondo),
@@ -103,18 +116,13 @@ fun LoginScreen(
         )
 
         Card(
-            modifier = Modifier
-                .align(Alignment.Center)
-                .padding(32.dp)
-                .fillMaxWidth(),
+            modifier = Modifier.align(Alignment.Center).padding(32.dp).fillMaxWidth(),
             shape = RoundedCornerShape(12.dp),
             colors = CardDefaults.cardColors(containerColor = cardBg),
             elevation = CardDefaults.cardElevation(defaultElevation = 8.dp)
         ) {
             Column(
-                modifier = Modifier
-                    .padding(24.dp)
-                    .fillMaxWidth(),
+                modifier = Modifier.padding(24.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 Image(
@@ -125,13 +133,7 @@ fun LoginScreen(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                Text(
-                    text = "Accedi",
-                    fontSize = 24.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = almaRed,
-                    textAlign = TextAlign.Center
-                )
+                Text("Accedi", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = almaRed)
 
                 Spacer(modifier = Modifier.height(24.dp))
 
@@ -139,13 +141,7 @@ fun LoginScreen(
                     value = email,
                     onValueChange = { email = it; errorMessage = null },
                     placeholder = { Text("Email address") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.LightGray,
-                        unfocusedBorderColor = Color.LightGray
-                    )
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -154,33 +150,18 @@ fun LoginScreen(
                     value = password,
                     onValueChange = { password = it; errorMessage = null },
                     placeholder = { Text("Password") },
-                    modifier = Modifier.fillMaxWidth(),
-                    singleLine = true,
                     visualTransformation = PasswordVisualTransformation(),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Color.LightGray,
-                        unfocusedBorderColor = Color.LightGray
-                    )
+                    modifier = Modifier.fillMaxWidth()
                 )
 
                 if (errorMessage != null) {
-                    Text(
-                        text = errorMessage!!,
-                        color = Color.Red,
-                        fontSize = 12.sp,
-                        modifier = Modifier.padding(top = 8.dp)
-                    )
+                    Text(errorMessage!!, color = Color.Red, fontSize = 12.sp, modifier = Modifier.padding(top = 8.dp))
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 TextButton(onClick = onNavigateToRegister) {
-                    Text(
-                        text = "Non sei registrato? Registrati qui",
-                        color = Color.Black,
-                        fontSize = 14.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                    Text("Non sei registrato? Registrati qui", color = Color.Black, fontWeight = FontWeight.SemiBold)
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
@@ -193,26 +174,19 @@ fun LoginScreen(
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = almaRed),
-                    modifier = Modifier.fillMaxWidth().height(45.dp),
-                    shape = RoundedCornerShape(8.dp)
+                    modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
-                    Text("Accedi", color = Color.White, fontSize = 16.sp)
+                    Text("Accedi", color = Color.White)
                 }
 
-                // Bottone biometria — visibile solo se il dispositivo la supporta
-                // e l'utente ha già fatto almeno un login con password
                 if (biometricAvailable && biometricEnabled) {
                     Spacer(modifier = Modifier.height(12.dp))
-
                     Button(
                         onClick = { launchBiometric() },
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = almaRed.copy(alpha = 0.8f)
-                        ),
-                        modifier = Modifier.fillMaxWidth().height(45.dp),
-                        shape = RoundedCornerShape(8.dp)
+                        colors = ButtonDefaults.buttonColors(containerColor = almaRed.copy(alpha = 0.8f)),
+                        modifier = Modifier.fillMaxWidth().height(45.dp)
                     ) {
-                        Text("Accedi con biometria", color = Color.White, fontSize = 16.sp)
+                        Text("Accedi con biometria", color = Color.White)
                     }
                 }
             }
