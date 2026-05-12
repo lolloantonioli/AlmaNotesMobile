@@ -28,7 +28,7 @@ fun AlmaNotesFooter(navController: NavController) {
             selected = currentDestination?.route?.contains("Home") == true,
             onClick = {
                 navController.navigate(Route.Home) {
-                    popUpTo(Route.Home) { saveState = true }
+
                     launchSingleTop = true
                     restoreState = true
                 }
