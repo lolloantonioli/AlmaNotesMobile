@@ -48,7 +48,7 @@ fun AppBar(navController: NavController) {
             }
         },
         actions = {
-            IconButton(onClick = { navController.navigate(Route.Rewards) {
+            IconButton(onClick = { navController.navigate(Route.Theme) {
                 launchSingleTop = true
                 restoreState = true
             } }) {
