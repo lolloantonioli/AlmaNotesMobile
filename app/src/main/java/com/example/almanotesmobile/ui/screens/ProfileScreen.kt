@@ -2,8 +2,8 @@ package com.example.almanotesmobile.ui.screens
 
 import android.content.Context
 import android.net.Uri
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,8 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
-import com.example.almanotesmobile.data.Theme
-import com.example.almanotesmobile.ui.composables.RadioListItem
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
 import java.io.File
 
@@ -58,10 +56,8 @@ fun ProfileScreen(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
         if (uri != null) {
-            // 1. Copia l'immagine della galleria nella memoria permanente (risolve il problema della persistenza!)
             val savedPath = saveImageToInternalStorage(context, uri)
             if (savedPath != null) {
-                // 2. Salva il nuovo percorso nel DataStore
                 authViewModel.updateProfileImage(savedPath)
             }
         }
@@ -75,21 +71,25 @@ fun ProfileScreen(
         if (success && tempImageUri != null) {
             val savedPath = saveImageToInternalStorage(context, tempImageUri!!)
             if (savedPath != null) {
-                // 2. Salva il nuovo percorso nel DataStore
                 authViewModel.updateProfileImage(savedPath)
             }
         }
     }
 
     fun launchCamera() {
-        val file = File(context.filesDir, "profile_picture.jpg")
-        val uri = FileProvider.getUriForFile(
-            context,
-            "${context.packageName}.fileprovider",
-            file
-        )
-        tempImageUri = uri
-        cameraLauncher.launch(uri)
+        try {
+            val directory = File(context.cacheDir, "images").apply { mkdirs() }
+            val file = File(directory, "profile_temp_${System.currentTimeMillis()}.jpg")
+            
+            // L'authority DEVE essere identica a quella definita nel Manifest
+            val authority = "${context.packageName}.provider"
+            val uri = FileProvider.getUriForFile(context, authority, file)
+            
+            tempImageUri = uri
+            cameraLauncher.launch(uri)
+        } catch (e: Exception) {
+            Toast.makeText(context, "Errore fotocamera: ${e.message}", Toast.LENGTH_SHORT).show()
+        }
     }
 
     Column(
@@ -100,7 +100,7 @@ fun ProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Titolo "Profilo"
+        // Titolo Pagina
         Row(
             modifier = Modifier.padding(vertical = 24.dp),
             verticalAlignment = Alignment.CenterVertically
@@ -115,20 +115,20 @@ fun ProfileScreen(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(16.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+            elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
         ) {
             Row(
-                modifier = Modifier.padding(24.dp),
+                modifier = Modifier.padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Parte Sinistra: Immagine Profilo
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier
-                            .size(100.dp)
+                            .size(90.dp)
                             .clip(CircleShape)
-                            .background(Color(0xFFF0F0F0))
-                            .border(1.dp, Color.LightGray, CircleShape)
+                            .background(Color(0xFFF5F5F5))
+                            .border(1.dp, Color.LightGray.copy(alpha = 0.5f), CircleShape)
                             .clickable { showImageSourceDialog = true },
                         contentAlignment = Alignment.Center
                     ) {
@@ -141,46 +141,58 @@ fun ProfileScreen(
                             )
                         } else {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Icon(Icons.Default.AddAPhoto, null, tint = Color.Gray, modifier = Modifier.size(32.dp))
-                                Text("Aggiungi\nimmagine", fontSize = 10.sp, textAlign = TextAlign.Center, color = Color.Gray)
+                                Icon(Icons.Default.AddAPhoto, null, tint = Color.Gray, modifier = Modifier.size(30.dp))
+                                Text(
+                                    "Aggiungi\nimmagine", 
+                                    fontSize = 9.sp, 
+                                    lineHeight = 11.sp,
+                                    textAlign = TextAlign.Center, 
+                                    color = Color.Gray
+                                )
                             }
                         }
                     }
                 }
 
-                Spacer(Modifier.width(24.dp))
+                Spacer(Modifier.width(20.dp))
 
                 // Parte Destra: Credenziali
                 Column(modifier = Modifier.weight(1f)) {
                     CredentialRow(icon = Icons.Default.AlternateEmail, label = "Username", value = username)
-                    HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Color(0xFFEEEEEE))
+                    HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
                     CredentialRow(icon = Icons.Outlined.Email, label = "E-mail", value = email)
-                    HorizontalDivider(Modifier.padding(vertical = 8.dp), color = Color(0xFFEEEEEE))
+                    HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
                     CredentialRow(icon = Icons.Outlined.Lock, label = "Password", value = "••••••••••••", isPassword = true)
                 }
             }
         }
     }
 
-    // Dialog per scegliere la sorgente dell'immagine
+    // Dialog Selezione Immagine
     if (showImageSourceDialog) {
         AlertDialog(
             onDismissRequest = { showImageSourceDialog = false },
-            title = { Text("Immagine Profilo") },
+            title = { Text("Immagine Profilo", fontWeight = FontWeight.Bold) },
             text = { Text("Scegli da dove caricare la tua foto") },
             confirmButton = {
-                TextButton(onClick = {
-                    //galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-                }) {
+                Button(
+                    onClick = { 
+                        showImageSourceDialog = false
+                        galleryLauncher.launch("image/*") 
+                    },
+                    colors = ButtonDefaults.buttonColors(containerColor = almaRed)
+                ) {
                     Text("Galleria")
                 }
             },
             dismissButton = {
-                TextButton(onClick = {
-                    tempImageUri = createTempPictureUri(context) // Usa la funzione creata al Problema 1
-                    cameraLauncher.launch(tempImageUri!!)
-                }) {
-                    Text("Fotocamera")
+                OutlinedButton(
+                    onClick = { 
+                        showImageSourceDialog = false
+                        launchCamera()
+                    }
+                ) {
+                    Text("Fotocamera", color = almaRed)
                 }
             }
         )
@@ -193,25 +205,14 @@ fun CredentialRow(icon: ImageVector, label: String, value: String, isPassword: B
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(20.dp))
+        Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(16.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(label, fontSize = 10.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-            Text(value, fontSize = 14.sp, color = Color.Black)
+            Text(value, fontSize = 14.sp, color = Color.Black, fontWeight = FontWeight.Medium)
         }
         if (isPassword) {
-            Icon(Icons.Outlined.Visibility, null, tint = Color.Gray, modifier = Modifier.size(18.dp))
+            Icon(Icons.Outlined.Visibility, null, tint = Color.LightGray, modifier = Modifier.size(18.dp))
         }
     }
-}
-
-fun createTempPictureUri(context: Context): Uri {
-    val tempFile = File(context.cacheDir, "temp_profile_pic.jpg")
-    tempFile.createNewFile()
-    // L'authority deve corrispondere a quella del Manifest!
-    return FileProvider.getUriForFile(
-        context,
-        "${context.packageName}.provider",
-        tempFile
-    )
 }
