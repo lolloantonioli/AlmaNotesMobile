@@ -22,6 +22,6 @@ class ProfileViewModel(private val repository: NoteRepository) : ViewModel() {
     fun getTopDownloaded(): StateFlow<List<Note>> = repository.getTopDownloaded(3)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    fun getTopRated(): StateFlow<List<Note>> = repository.getTopRated(3)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+    //fun getTopRated(): StateFlow<List<Note>> = repository.getTopRated(3)
+      //  .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 }
