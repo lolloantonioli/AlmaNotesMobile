@@ -76,19 +76,19 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 4. PREFERITI (Star)
+        // 4. PREFERITI / RECENSIONI (Target: ReviewsScreen)
         NavigationBarItem(
             icon = {
                 Icon(
                     painter = painterResource(id = R.drawable.favourites),
-                    contentDescription = "Preferiti",
+                    contentDescription = "Recensioni",
                     modifier = Modifier.size(24.dp)
                 )
             },
-            label = { Text("Preferiti") },
-            selected = currentDestination?.route?.contains("Favourites") == true,
+            label = { Text("Recensioni") },
+            selected = currentDestination?.route?.contains("Reviews") == true,
             onClick = {
-                navController.navigate(Route.Favourites) {
+                navController.navigate(Route.Reviews) {
                     launchSingleTop = true
                     restoreState = true
                 }
