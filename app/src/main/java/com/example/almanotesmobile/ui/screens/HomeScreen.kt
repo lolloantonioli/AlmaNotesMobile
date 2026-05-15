@@ -62,6 +62,7 @@ private fun Long.toRelativeTimeString(): String {
 @Composable
 fun HomeScreen(
     onSearchClick: () -> Unit,
+    onOpenNote: (Long) -> Unit,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     var selectedNote by remember { mutableStateOf<Note?>(null) }
@@ -113,8 +114,8 @@ fun HomeScreen(
             note = note,
             onDismiss = { selectedNote = null },
             onDownload = {
-                viewModel.incrementDownload(note.id)
                 selectedNote = null
+                onOpenNote(note.id)
             }
         )
     }

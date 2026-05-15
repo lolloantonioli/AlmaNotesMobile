@@ -22,6 +22,9 @@ sealed interface Route {
     data object Search : Route
 
     @Serializable
+    data object Upload : Route
+
+    @Serializable
     data object Favourites : Route
 
     @Serializable
@@ -32,4 +35,7 @@ sealed interface Route {
 
     @Serializable
     data object Profile : Route
+
+    @Serializable
+    data class PdfViewer(val noteId: Long) : Route
 }

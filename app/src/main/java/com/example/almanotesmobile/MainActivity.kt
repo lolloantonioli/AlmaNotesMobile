@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import com.example.almanotesmobile.data.Theme
 import com.example.almanotesmobile.ui.composables.AlmaNotesFooter
 import com.example.almanotesmobile.ui.composables.AppBar
@@ -38,6 +39,8 @@ class MainActivity : FragmentActivity() {
 
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route ?: ""
+            val isPdfViewer  = currentRoute.contains("PdfViewer")
 
             AlmaNotesMobileTheme(
                 darkTheme = when (themeState.theme) {
@@ -61,12 +64,12 @@ class MainActivity : FragmentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = { 
-                        // Mostriamo la barra solo se loggati
-                        if (isLoggedIn) AppBar(navController = navController)
+                        // Mostriamo la barra solo se loggati e non nel visualizzatore PDF
+                        if (isLoggedIn && !isPdfViewer) AppBar(navController = navController)
                     },
                     bottomBar = { 
                         // Mostriamo il footer solo nelle schermate principali
-                        if (isLoggedIn) {
+                        if (isLoggedIn && !isPdfViewer) {
                             AlmaNotesFooter(navController = navController)
                         }
                     }
@@ -107,12 +110,25 @@ class MainActivity : FragmentActivity() {
                                     navController.navigate(Route.Search) {
                                         launchSingleTop = true
                                     }
+                                },
+                                onOpenNote = { noteId ->
+                                    navController.navigate(Route.PdfViewer(noteId))
                                 }
                             )
                         }
 
                         composable<Route.Search> {
                             Greeting(name = "Cerca")
+                        }
+
+                        composable<Route.Upload> {
+                            UploadScreen(
+                                onUploadSuccess = {
+                                    navController.navigate(Route.Home) {
+                                        popUpTo(Route.Home) { inclusive = false }
+                                    }
+                                }
+                            )
                         }
 
                         composable<Route.Favourites> {
@@ -135,6 +151,14 @@ class MainActivity : FragmentActivity() {
                                 authViewModel = authViewModel,
                                 themeState = themeState,
                                 themeActions = themeViewModel.actions
+                            )
+                        }
+
+                        composable<Route.PdfViewer> { backStackEntry ->
+                            val pdfRoute: Route.PdfViewer = backStackEntry.toRoute()
+                            PdfViewerScreen(
+                                noteId = pdfRoute.noteId,
+                                onBack = { navController.popBackStack() }
                             )
                         }
                     }

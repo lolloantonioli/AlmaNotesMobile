@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.Flow
 class NoteRepository(private val dao: NoteDao) {
     fun getTopDownloaded(limit: Int = 3): Flow<List<Note>> = dao.getTopDownloaded(limit)
     fun getLatestUploaded(limit: Int = 3): Flow<List<Note>>  = dao.getLatestUploaded(limit)
+    suspend fun getNoteById(id: Long): Note? = dao.getNoteById(id)
     suspend fun insert(note: Note): Long  = dao.insert(note)
     suspend fun insertAll(notes: List<Note>) = dao.insertAll(notes)
     suspend fun delete(note: Note)          = dao.delete(note)

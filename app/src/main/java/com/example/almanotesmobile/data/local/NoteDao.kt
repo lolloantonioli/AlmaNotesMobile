@@ -11,6 +11,9 @@ interface NoteDao {
     @Query("SELECT * FROM notes ORDER BY uploadedAt DESC LIMIT :limit")
     fun getLatestUploaded(limit: Int): Flow<List<Note>>
 
+    @Query("SELECT * FROM notes WHERE id = :id")
+    suspend fun getNoteById(id: Long): Note?
+
     @Query("SELECT COUNT(*) FROM notes")
     suspend fun count(): Int
 

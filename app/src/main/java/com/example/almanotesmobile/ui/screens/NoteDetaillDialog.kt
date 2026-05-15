@@ -225,14 +225,34 @@ fun NoteDetailDialog(
                     thickness = 0.5.dp
                 )
 
+                // Sostituisci la sezione "── Conferma download ──" e "── Bottoni ──" con:
+
                 // ── Conferma download ────────────────────────────────────────
-                Text(
-                    text = "Sei sicuro di voler scaricare questo file?",
-                    fontSize = 13.sp,
-                    color = Color.Gray,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
-                )
+                val hasFile = note.filePath.isNotBlank()
+
+                if (hasFile) {
+                    Text(
+                        text = "Sei sicuro di voler scaricare questo file?",
+                        fontSize = 13.sp,
+                        color = Color.Gray,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                } else {
+                    Surface(
+                        shape = RoundedCornerShape(8.dp),
+                        color = Color(0xFFFFF3CD),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = "⚠ Nessun file disponibile per questo appunto.",
+                            fontSize = 12.sp,
+                            color = Color(0xFF856404),
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(10.dp)
+                        )
+                    }
+                }
 
                 Spacer(Modifier.height(16.dp))
 
@@ -250,7 +270,11 @@ fun NoteDetailDialog(
                         onClick = onDownload,
                         modifier = Modifier.weight(1f),
                         shape = RoundedCornerShape(24.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = almaRed)
+                        enabled = hasFile,   // <-- disabilitato se non c'è file
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = almaRed,
+                            disabledContainerColor = Color.LightGray
+                        )
                     ) {
                         Icon(
                             imageVector = Icons.Default.Download,
