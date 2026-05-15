@@ -68,49 +68,6 @@ fun SearchScreen(
             }
         }
 
-        // 2. Filtri e Chips
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            // Icona Filtro
-            Surface(
-                shape = RoundedCornerShape(8.dp),
-                border = androidx.compose.foundation.BorderStroke(1.dp, almaRed.copy(alpha = 0.5f)),
-                color = Color.White,
-                modifier = Modifier.size(36.dp)
-            ) {
-                Box(contentAlignment = Alignment.Center) {
-                    Icon(Icons.Default.MenuOpen, contentDescription = "Filtri", tint = almaRed, modifier = Modifier.size(20.dp))
-                }
-            }
-
-            // Chips (Simulate come nell'immagine)
-            val filters = listOf("Cinti", "Cinti", "Cinti", "Cinti")
-            filters.forEach { filter ->
-                FilterChip(
-                    onClick = { /* Rimuovi filtro */ },
-                    label = { Text(filter, fontSize = 12.sp, color = almaRed) },
-                    selected = true,
-                    trailingIcon = { Icon(Icons.Default.Close, null, modifier = Modifier.size(14.dp), tint = almaRed) },
-                    colors = FilterChipDefaults.filterChipColors(
-                        selectedContainerColor = Color.White,
-                        selectedLabelColor = almaRed,
-                        selectedTrailingIconColor = almaRed
-                    ),
-                    border = FilterChipDefaults.filterChipBorder(
-                        borderColor = almaRed.copy(alpha = 0.5f),
-                        selectedBorderColor = almaRed.copy(alpha = 0.5f),
-                        enabled = true,
-                        selected = true
-                    )
-                )
-            }
-        }
-
         Spacer(Modifier.height(16.dp))
 
         // 3. Lista Risultati
