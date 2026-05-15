@@ -7,12 +7,7 @@ import com.example.almanotesmobile.data.local.NoteDatabase
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.ThemeRepository
-import com.example.almanotesmobile.ui.screens.AuthViewModel
-import com.example.almanotesmobile.ui.screens.HomeViewModel
-import com.example.almanotesmobile.ui.screens.PdfViewerViewModel
-import com.example.almanotesmobile.ui.screens.SearchViewModel
-import com.example.almanotesmobile.ui.screens.ThemeViewModel
-import com.example.almanotesmobile.ui.screens.UploadViewModel
+import com.example.almanotesmobile.ui.screens.*
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -42,8 +37,11 @@ val appModule = module {
     }
     single { get<NoteDatabase>().noteDao() }
     single { NoteRepository(get()) }
+    
+    // ViewModels
     viewModel { HomeViewModel(get()) }
     viewModel { PdfViewerViewModel(get()) }
     viewModel { UploadViewModel(get()) }
     viewModel { SearchViewModel(get()) }
+    viewModel { ReviewsViewModel(get()) }
 }

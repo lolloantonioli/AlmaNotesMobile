@@ -9,6 +9,8 @@ class NoteRepository(private val dao: NoteDao) {
     fun getLatestUploaded(limit: Int = 3): Flow<List<Note>>  = dao.getLatestUploaded(limit)
     suspend fun getNoteById(id: Long): Note? = dao.getNoteById(id)
     fun searchNotes(query: String): Flow<List<Note>> = dao.searchNotes(query)
+    fun getDownloadedNotes(): Flow<List<Note>> = dao.getDownloadedNotes()
+    suspend fun updateRating(id: Long, rating: Int) = dao.updateRating(id, rating)
     suspend fun insert(note: Note): Long  = dao.insert(note)
     suspend fun insertAll(notes: List<Note>) = dao.insertAll(notes)
     suspend fun delete(note: Note)          = dao.delete(note)

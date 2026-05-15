@@ -17,6 +17,12 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%' OR professorName LIKE '%' || :query || '%' OR courseName LIKE '%' || :query || '%'")
     fun searchNotes(query: String): Flow<List<Note>>
 
+    @Query("SELECT * FROM notes WHERE downloadCount > 0 ORDER BY uploadedAt DESC")
+    fun getDownloadedNotes(): Flow<List<Note>>
+
+    @Query("UPDATE notes SET rating = ((rating * ratingCount) + :newRating) / (ratingCount + 1), ratingCount = ratingCount + 1 WHERE id = :id")
+    suspend fun updateRating(id: Long, newRating: Int)
+
     @Query("SELECT COUNT(*) FROM notes")
     suspend fun count(): Int
 

@@ -28,7 +28,7 @@ sealed interface Route {
     data object Favourites : Route
 
     @Serializable
-    data object Rewards : Route
+    data object Reviews : Route
 
     @Serializable
     data object Theme : Route

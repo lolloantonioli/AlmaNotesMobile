@@ -50,7 +50,6 @@ class MainActivity : FragmentActivity() {
                 },
                 dynamicColor = themeState.dynamicColor
             ) {
-                // Se non sappiamo ancora se l'utente è registrato, aspettiamo
                 if (isRegistered == null) return@AlmaNotesMobileTheme
 
                 val startDestination = if (!isRegistered!!) {
@@ -64,11 +63,9 @@ class MainActivity : FragmentActivity() {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
                     topBar = { 
-                        // Mostriamo la barra solo se loggati e non nel visualizzatore PDF
                         if (isLoggedIn && !isPdfViewer) AppBar(navController = navController)
                     },
                     bottomBar = { 
-                        // Mostriamo il footer solo nelle schermate principali
                         if (isLoggedIn && !isPdfViewer) {
                             AlmaNotesFooter(navController = navController)
                         }
@@ -135,12 +132,12 @@ class MainActivity : FragmentActivity() {
                             )
                         }
 
-                        composable<Route.Favourites> {
-                            Greeting(name = "Preferiti")
+                        composable<Route.Reviews> {
+                            ReviewsScreen()
                         }
 
-                        composable<Route.Rewards> {
-                            Greeting(name = "Premi")
+                        composable<Route.Favourites> {
+                            Greeting(name = "Preferiti")
                         }
 
                         composable<Route.Theme> {
