@@ -37,6 +37,10 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.PROFILE_IMAGE_URI] = uri }
     }
 
+    suspend fun saveProfileImage(path: String) {
+        dataStore.edit { it[Keys.PROFILE_IMAGE_URI] = path }
+    }
+
     suspend fun login(email: String, password: String): Boolean {
         var success = false
         dataStore.edit { prefs ->

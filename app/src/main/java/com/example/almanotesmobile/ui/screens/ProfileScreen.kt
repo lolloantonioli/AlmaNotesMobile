@@ -1,7 +1,9 @@
 package com.example.almanotesmobile.ui.screens
 
+import android.content.Context
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -34,6 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.Theme
 import com.example.almanotesmobile.ui.composables.RadioListItem
+import com.example.almanotesmobile.utils.saveImageToInternalStorage
 import java.io.File
 
 @Composable
@@ -54,7 +57,14 @@ fun ProfileScreen(
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        uri?.let { authViewModel.updateProfileImage(it.toString()) }
+        if (uri != null) {
+            // 1. Copia l'immagine della galleria nella memoria permanente (risolve il problema della persistenza!)
+            val savedPath = saveImageToInternalStorage(context, uri)
+            if (savedPath != null) {
+                // 2. Salva il nuovo percorso nel DataStore
+                authViewModel.updateProfileImage(savedPath)
+            }
+        }
     }
 
     // Launcher per la Fotocamera
@@ -62,8 +72,12 @@ fun ProfileScreen(
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
-        if (success) {
-            tempImageUri?.let { authViewModel.updateProfileImage(it.toString()) }
+        if (success && tempImageUri != null) {
+            val savedPath = saveImageToInternalStorage(context, tempImageUri!!)
+            if (savedPath != null) {
+                // 2. Salva il nuovo percorso nel DataStore
+                authViewModel.updateProfileImage(savedPath)
+            }
         }
     }
 
@@ -155,17 +169,16 @@ fun ProfileScreen(
             title = { Text("Immagine Profilo") },
             text = { Text("Scegli da dove caricare la tua foto") },
             confirmButton = {
-                TextButton(onClick = { 
-                    showImageSourceDialog = false
-                    galleryLauncher.launch("image/*") 
+                TextButton(onClick = {
+                    //galleryLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }) {
                     Text("Galleria")
                 }
             },
             dismissButton = {
-                TextButton(onClick = { 
-                    showImageSourceDialog = false
-                    launchCamera()
+                TextButton(onClick = {
+                    tempImageUri = createTempPictureUri(context) // Usa la funzione creata al Problema 1
+                    cameraLauncher.launch(tempImageUri!!)
                 }) {
                     Text("Fotocamera")
                 }
@@ -190,4 +203,15 @@ fun CredentialRow(icon: ImageVector, label: String, value: String, isPassword: B
             Icon(Icons.Outlined.Visibility, null, tint = Color.Gray, modifier = Modifier.size(18.dp))
         }
     }
+}
+
+fun createTempPictureUri(context: Context): Uri {
+    val tempFile = File(context.cacheDir, "temp_profile_pic.jpg")
+    tempFile.createNewFile()
+    // L'authority deve corrispondere a quella del Manifest!
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.provider",
+        tempFile
+    )
 }
