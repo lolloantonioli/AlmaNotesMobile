@@ -79,7 +79,9 @@ class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
             if (pages == null) {
                 _state.value = PdfViewerState.Error("Impossibile aprire il file PDF")
             } else {
-                if (needsDownload) repository.incrementDownload(noteId)
+                // Conteggiamo l'apertura come un download/visualizzazione in ogni caso,
+                // anche se il file è stato caricato dall'utente.
+                repository.incrementDownload(noteId)
                 _state.value = PdfViewerState.Ready(pages, note)
             }
         }
