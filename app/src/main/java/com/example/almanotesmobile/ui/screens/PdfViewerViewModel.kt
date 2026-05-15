@@ -41,15 +41,24 @@ class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
                 return@launch
             }
 
-            val pdfFile      = getPdfFile(context, noteId)
-            val isFirstView  = !pdfFile.exists()
+            // 1. Controlliamo se il file esiste già localmente (es. caricato dall'utente)
+            val localFile = File(note.filePath)
+            val pdfFile = if (localFile.exists() && localFile.isFile) {
+                localFile
+            } else {
+                // Altrimenti usiamo il percorso standard della cache per i download
+                getPdfFile(context, noteId)
+            }
 
-            // ── Download (solo se non già in cache) ──────────────────────────
-            if (isFirstView) {
-                if (note.filePath.isBlank()) {
-                    _state.value = PdfViewerState.Error("Nessun file PDF disponibile per questa nota")
+            val needsDownload = !pdfFile.exists()
+
+            // ── Download (solo se non presente localmente) ──────────────────
+            if (needsDownload) {
+                if (note.filePath.isBlank() || !note.filePath.startsWith("http")) {
+                    _state.value = PdfViewerState.Error("Nessun file disponibile localmente e URL non valido")
                     return@launch
                 }
+                
                 _state.value = PdfViewerState.Downloading(0)
                 val downloaded = downloadPdfToInternalStorage(
                     context    = context,
@@ -68,9 +77,9 @@ class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
             val pages = renderPages(pdfFile) { p -> _state.value = PdfViewerState.Rendering(p) }
 
             if (pages == null) {
-                _state.value = PdfViewerState.Error("Impossibile aprire il PDF")
+                _state.value = PdfViewerState.Error("Impossibile aprire il file PDF")
             } else {
-                if (isFirstView) repository.incrementDownload(noteId)
+                if (needsDownload) repository.incrementDownload(noteId)
                 _state.value = PdfViewerState.Ready(pages, note)
             }
         }
