@@ -44,4 +44,5 @@ val appModule = module {
     viewModel { UploadViewModel(get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { ReviewsViewModel(get()) }
+    viewModel { ProfileViewModel(get()) }
 }

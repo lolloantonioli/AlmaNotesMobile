@@ -1,6 +1,8 @@
 package com.example.almanotesmobile.ui.screens
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -31,6 +33,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
@@ -51,44 +54,55 @@ fun ProfileScreen(
     val context = LocalContext.current
     var showImageSourceDialog by remember { mutableStateOf(false) }
 
-    // Launcher per la Galleria
+    // Launcher Galleria
     val galleryLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? ->
-        if (uri != null) {
-            val savedPath = saveImageToInternalStorage(context, uri)
-            if (savedPath != null) {
-                authViewModel.updateProfileImage(savedPath)
-            }
+        uri?.let { 
+            val savedPath = saveImageToInternalStorage(context, it)
+            savedPath?.let { path -> authViewModel.updateProfileImage(path) }
         }
     }
 
-    // Launcher per la Fotocamera
+    // Launcher Fotocamera
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.TakePicture()
     ) { success ->
         if (success && tempImageUri != null) {
             val savedPath = saveImageToInternalStorage(context, tempImageUri!!)
-            if (savedPath != null) {
-                authViewModel.updateProfileImage(savedPath)
-            }
+            savedPath?.let { path -> authViewModel.updateProfileImage(path) }
         }
     }
 
-    fun launchCamera() {
+    // Funzione per preparare il file e avviare la fotocamera
+    val startCamera = {
         try {
             val directory = File(context.cacheDir, "images").apply { mkdirs() }
-            val file = File(directory, "profile_temp_${System.currentTimeMillis()}.jpg")
-            
-            // L'authority DEVE essere identica a quella definita nel Manifest
-            val authority = "${context.packageName}.provider"
+            val file = File(directory, "profile_temp.jpg")
+            val authority = "com.example.almanotesmobile.provider"
             val uri = FileProvider.getUriForFile(context, authority, file)
-            
             tempImageUri = uri
             cameraLauncher.launch(uri)
         } catch (e: Exception) {
-            Toast.makeText(context, "Errore fotocamera: ${e.message}", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "Errore fotocamera: ${e.message}", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    // Launcher Permessi
+    val permissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) startCamera()
+        else Toast.makeText(context, "Permesso fotocamera necessario", Toast.LENGTH_SHORT).show()
+    }
+
+    fun launchCamera() {
+        val permissionCheck = ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA)
+        if (permissionCheck == PackageManager.PERMISSION_GRANTED) {
+            startCamera()
+        } else {
+            permissionLauncher.launch(Manifest.permission.CAMERA)
         }
     }
 
@@ -100,14 +114,14 @@ fun ProfileScreen(
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // Titolo Pagina
+        // Titolo
         Row(
-            modifier = Modifier.padding(vertical = 24.dp),
+            modifier = Modifier.padding(top = 24.dp, bottom = 32.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(Icons.Default.Person, null, tint = almaRed, modifier = Modifier.size(28.dp))
+            Icon(Icons.Default.PersonOutline, null, tint = almaRed, modifier = Modifier.size(28.dp))
             Spacer(Modifier.width(12.dp))
-            Text("Profilo", fontSize = 28.sp, fontWeight = FontWeight.Bold, color = almaRed)
+            Text("Profilo", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = almaRed)
         }
 
         // ── BOX CREDENZIALI ──
@@ -121,7 +135,7 @@ fun ProfileScreen(
                 modifier = Modifier.padding(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Parte Sinistra: Immagine Profilo
+                // Immagine Profilo
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Box(
                         modifier = Modifier
@@ -142,13 +156,7 @@ fun ProfileScreen(
                         } else {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.AddAPhoto, null, tint = Color.Gray, modifier = Modifier.size(30.dp))
-                                Text(
-                                    "Aggiungi\nimmagine", 
-                                    fontSize = 9.sp, 
-                                    lineHeight = 11.sp,
-                                    textAlign = TextAlign.Center, 
-                                    color = Color.Gray
-                                )
+                                Text("Aggiungi\nimmagine", fontSize = 9.sp, lineHeight = 11.sp, textAlign = TextAlign.Center, color = Color.Gray)
                             }
                         }
                     }
@@ -156,24 +164,25 @@ fun ProfileScreen(
 
                 Spacer(Modifier.width(20.dp))
 
-                // Parte Destra: Credenziali
+                // Dati Utente
                 Column(modifier = Modifier.weight(1f)) {
-                    CredentialRow(icon = Icons.Default.AlternateEmail, label = "Username", value = username)
+                    CredentialRow(icon = Icons.Default.AlternateEmail, label = "Username", value = username.ifEmpty { "Utente" })
                     HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
-                    CredentialRow(icon = Icons.Outlined.Email, label = "E-mail", value = email)
+                    CredentialRow(icon = Icons.Outlined.Email, label = "E-mail", value = email.ifEmpty { "non impostata" })
                     HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
                     CredentialRow(icon = Icons.Outlined.Lock, label = "Password", value = "••••••••••••", isPassword = true)
                 }
             }
         }
+        
+        Spacer(Modifier.height(100.dp)) 
     }
 
-    // Dialog Selezione Immagine
     if (showImageSourceDialog) {
         AlertDialog(
             onDismissRequest = { showImageSourceDialog = false },
-            title = { Text("Immagine Profilo", fontWeight = FontWeight.Bold) },
-            text = { Text("Scegli da dove caricare la tua foto") },
+            title = { Text("Foto Profilo", fontWeight = FontWeight.Bold) },
+            text = { Text("Scegli come inserire la tua foto:") },
             confirmButton = {
                 Button(
                     onClick = { 
@@ -205,8 +214,8 @@ fun CredentialRow(icon: ImageVector, label: String, value: String, isPassword: B
         modifier = Modifier.fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Icon(icon, null, tint = Color.Gray, modifier = Modifier.size(18.dp))
-        Spacer(Modifier.width(16.dp))
+        Icon(icon, null, tint = Color.DarkGray, modifier = Modifier.size(18.dp))
+        Spacer(Modifier.width(12.dp))
         Column(modifier = Modifier.weight(1f)) {
             Text(label, fontSize = 10.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
             Text(value, fontSize = 14.sp, color = Color.Black, fontWeight = FontWeight.Medium)
