@@ -12,12 +12,17 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         val PASSWORD          = stringPreferencesKey("password")
         val IS_REGISTERED     = booleanPreferencesKey("is_registered")
         val IS_LOGGED_IN      = booleanPreferencesKey("is_logged_in")
-        val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")   // <-- nuovo
+        val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
+        val PROFILE_IMAGE_URI = stringPreferencesKey("profile_image_uri")
     }
 
     val isRegistered: Flow<Boolean> = dataStore.data.map { it[Keys.IS_REGISTERED] ?: false }
     val isLoggedIn: Flow<Boolean>   = dataStore.data.map { it[Keys.IS_LOGGED_IN]  ?: false }
     val biometricEnabled: Flow<Boolean> = dataStore.data.map { it[Keys.BIOMETRIC_ENABLED] ?: false }
+
+    val username: Flow<String> = dataStore.data.map { it[Keys.USERNAME] ?: "" }
+    val email: Flow<String> = dataStore.data.map { it[Keys.EMAIL] ?: "" }
+    val profileImageUri: Flow<String?> = dataStore.data.map { it[Keys.PROFILE_IMAGE_URI] }
 
     suspend fun saveRegistration(username: String, email: String, password: String) {
         dataStore.edit { prefs ->
@@ -26,6 +31,10 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
             prefs[Keys.PASSWORD]      = password
             prefs[Keys.IS_REGISTERED] = true
         }
+    }
+
+    suspend fun updateProfileImage(uri: String) {
+        dataStore.edit { it[Keys.PROFILE_IMAGE_URI] = uri }
     }
 
     suspend fun login(email: String, password: String): Boolean {
@@ -39,12 +48,10 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         return success
     }
 
-    /** Chiamato dopo un login con password riuscito per abilitare la biometria */
     suspend fun setBiometricEnabled(enabled: Boolean) {
         dataStore.edit { it[Keys.BIOMETRIC_ENABLED] = enabled }
     }
 
-    /** Login diretto senza password (usato dopo auth biometrica riuscita) */
     suspend fun loginWithBiometric(): Boolean {
         var isReg = false
         dataStore.edit { prefs ->

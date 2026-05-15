@@ -19,8 +19,21 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     val biometricEnabled: StateFlow<Boolean> = repository.biometricEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val username: StateFlow<String> = repository.username
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    val email: StateFlow<String> = repository.email
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
+    val profileImageUri: StateFlow<String?> = repository.profileImageUri
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+
     fun register(username: String, email: String, password: String) {
         viewModelScope.launch { repository.saveRegistration(username, email, password) }
+    }
+
+    fun updateProfileImage(uri: String) {
+        viewModelScope.launch { repository.updateProfileImage(uri) }
     }
 
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {

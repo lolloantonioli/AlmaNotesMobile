@@ -20,6 +20,12 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE downloadCount > 0 ORDER BY uploadedAt DESC")
     fun getDownloadedNotes(): Flow<List<Note>>
 
+    @Query("SELECT * FROM notes WHERE uploaderName = :username ORDER BY uploadedAt DESC")
+    fun getNotesByUploader(username: String): Flow<List<Note>>
+
+    @Query("SELECT COUNT(*) FROM notes WHERE uploaderName = :username")
+    fun countNotesByUploader(username: String): Flow<Int>
+
     @Query("UPDATE notes SET rating = ((rating * ratingCount) + :newRating) / (ratingCount + 1), ratingCount = ratingCount + 1 WHERE id = :id")
     suspend fun updateRating(id: Long, newRating: Int)
 
