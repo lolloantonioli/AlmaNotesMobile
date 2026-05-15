@@ -31,13 +31,16 @@ fun SearchScreen(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
     val almaRed = Color(0xFFBB2E29)
+    
+    // Stato per gestire la nota selezionata e mostrare il dialog
+    var selectedNote by remember { mutableStateOf<Note?>(null) }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFFF5F5F5))
     ) {
-        // 1. Barra di Ricerca (Stile come da immagine)
+        // 1. Barra di Ricerca
         Card(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,7 +73,7 @@ fun SearchScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // 3. Lista Risultati
+        // 2. Lista Risultati
         LazyColumn(
             modifier = Modifier
                 .fillMaxSize()
@@ -78,9 +81,21 @@ fun SearchScreen(
             verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             items(searchResults) { note ->
-                SearchNoteItem(note = note, onClick = { onOpenNote(note.id) })
+                SearchNoteItem(note = note, onClick = { selectedNote = note })
             }
         }
+    }
+
+    // Dialog di dettaglio (uguale a quello della HomeScreen)
+    selectedNote?.let { note ->
+        NoteDetailDialog(
+            note = note,
+            onDismiss = { selectedNote = null },
+            onDownload = {
+                selectedNote = null
+                onOpenNote(note.id)
+            }
+        )
     }
 }
 
@@ -100,7 +115,7 @@ fun SearchNoteItem(note: Note, onClick: () -> Unit) {
             Row(verticalAlignment = Alignment.Top) {
                 // PDF Icon
                 Icon(
-                    painter = painterResource(id = R.drawable.logo), // Usiamo il logo come segnaposto PDF
+                    painter = painterResource(id = R.drawable.logo),
                     contentDescription = null,
                     tint = almaRed,
                     modifier = Modifier.size(32.dp)
@@ -159,7 +174,6 @@ fun SearchNoteItem(note: Note, onClick: () -> Unit) {
     }
 }
 
-// Helper per TextField senza decorazioni pesanti
 @Composable
 fun BasicTextField(
     value: String,
