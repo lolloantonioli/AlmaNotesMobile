@@ -14,6 +14,9 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE id = :id")
     suspend fun getNoteById(id: Long): Note?
 
+    @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%' OR professorName LIKE '%' || :query || '%' OR courseName LIKE '%' || :query || '%'")
+    fun searchNotes(query: String): Flow<List<Note>>
+
     @Query("SELECT COUNT(*) FROM notes")
     suspend fun count(): Int
 

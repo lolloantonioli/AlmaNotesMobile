@@ -10,6 +10,7 @@ import com.example.almanotesmobile.data.repositories.ThemeRepository
 import com.example.almanotesmobile.ui.screens.AuthViewModel
 import com.example.almanotesmobile.ui.screens.HomeViewModel
 import com.example.almanotesmobile.ui.screens.PdfViewerViewModel
+import com.example.almanotesmobile.ui.screens.SearchViewModel
 import com.example.almanotesmobile.ui.screens.ThemeViewModel
 import com.example.almanotesmobile.ui.screens.UploadViewModel
 import org.koin.core.module.dsl.viewModel
@@ -44,4 +45,5 @@ val appModule = module {
     viewModel { HomeViewModel(get()) }
     viewModel { PdfViewerViewModel(get()) }
     viewModel { UploadViewModel(get()) }
+    viewModel { SearchViewModel(get()) }
 }

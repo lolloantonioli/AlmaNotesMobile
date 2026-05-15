@@ -118,7 +118,11 @@ class MainActivity : FragmentActivity() {
                         }
 
                         composable<Route.Search> {
-                            Greeting(name = "Cerca")
+                            SearchScreen(
+                                onOpenNote = { noteId ->
+                                    navController.navigate(Route.PdfViewer(noteId))
+                                }
+                            )
                         }
 
                         composable<Route.Upload> {
