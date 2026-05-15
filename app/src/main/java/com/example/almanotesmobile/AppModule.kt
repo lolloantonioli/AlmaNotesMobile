@@ -11,6 +11,7 @@ import com.example.almanotesmobile.ui.screens.AuthViewModel
 import com.example.almanotesmobile.ui.screens.HomeViewModel
 import com.example.almanotesmobile.ui.screens.PdfViewerViewModel
 import com.example.almanotesmobile.ui.screens.ThemeViewModel
+import com.example.almanotesmobile.ui.screens.UploadViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
@@ -42,4 +43,5 @@ val appModule = module {
     single { NoteRepository(get()) }
     viewModel { HomeViewModel(get()) }
     viewModel { PdfViewerViewModel(get()) }
+    viewModel { UploadViewModel(get()) }
 }

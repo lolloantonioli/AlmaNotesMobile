@@ -79,19 +79,25 @@ fun UploadScreen(
 
                 // BLOCCO CAMPI UNITI
                 Column(modifier = Modifier.fillMaxWidth().border(1.dp, borderColor)) {
-                    
-                    InputFieldPlaceholder(value = fileName, onValueChange = { fileName = it }, placeholder = "Nome File")
-                    
-                    Divider(color = borderColor)
+
+                    InputFieldPlaceholder(value = fileName, onValueChange = { fileName = it }, placeholder = "Nome Appunto")
+
+                    HorizontalDivider(color = borderColor) // Usa HorizontalDivider invece di Divider (deprecato)
+
                     InputFieldPlaceholder(value = description, onValueChange = { description = it }, placeholder = "Descrizione")
-                    
-                    Divider(color = borderColor)
-                    DropdownPlaceholder(text = if (professor.isEmpty()) "Professore" else professor, arrowColor = almaRed)
-                    
-                    Divider(color = borderColor)
-                    DropdownPlaceholder(text = if (degreeCourse.isEmpty()) "Corso di Laurea" else degreeCourse, arrowColor = almaRed)
-                    
-                    Divider(color = borderColor)
+
+                    HorizontalDivider(color = borderColor)
+
+                    // SOSTITUITI I FINTI DROPDOWN CON CAMPI DI TESTO VERI
+                    InputFieldPlaceholder(value = professor, onValueChange = { professor = it }, placeholder = "Professore (Es. Rossi)")
+
+                    HorizontalDivider(color = borderColor)
+
+                    InputFieldPlaceholder(value = degreeCourse, onValueChange = { degreeCourse = it }, placeholder = "Corso di Laurea (Es. Informatica)")
+
+                    HorizontalDivider(color = borderColor)
+
+                    // Box Selezione File (Questo andava bene!)
                     Row(
                         modifier = Modifier.fillMaxWidth().height(45.dp).background(Color.White),
                         verticalAlignment = Alignment.CenterVertically
@@ -106,7 +112,7 @@ fun UploadScreen(
                             }
                         }
                         Text(
-                            text = selectedFileUri?.path?.split("/")?.last() ?: "No file chosen",
+                            text = selectedFileUri?.path?.split("/")?.last() ?: "Nessun file selezionato",
                             fontSize = 12.sp,
                             color = Color.Gray,
                             modifier = Modifier.padding(start = 12.dp),
