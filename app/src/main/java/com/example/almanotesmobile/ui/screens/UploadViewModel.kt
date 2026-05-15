@@ -1,0 +1,62 @@
+package com.example.almanotesmobile.ui.screens
+
+import android.content.Context
+import android.net.Uri
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.data.repositories.NoteRepository
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
+import java.io.FileOutputStream
+
+class UploadViewModel(private val repository: NoteRepository) : ViewModel() {
+
+    fun uploadNote(
+        context: Context,
+        uri: Uri,
+        title: String,
+        description: String,
+        professor: String,
+        course: String,
+        onSuccess: () -> Unit
+    ) {
+        viewModelScope.launch {
+            val filePath = saveFileToInternalStorage(context, uri, title)
+            if (filePath != null) {
+                val newNote = Note(
+                    title = title,
+                    courseName = course,
+                    professorName = professor,
+                    subject = course, // Using course as subject for now
+                    filePath = filePath,
+                    uploaderName = "Tu", // Default to current user
+                    uploadedAt = System.currentTimeMillis()
+                )
+                repository.insert(newNote)
+                onSuccess()
+            }
+        }
+    }
+
+    private suspend fun saveFileToInternalStorage(context: Context, uri: Uri, fileName: String): String? {
+        return withContext(Dispatchers.IO) {
+            try {
+                val inputStream = context.contentResolver.openInputStream(uri)
+                val file = File(context.filesDir, "${fileName.replace(" ", "_")}_${System.currentTimeMillis()}.pdf")
+                val outputStream = FileOutputStream(file)
+                inputStream?.use { input ->
+                    outputStream.use { output ->
+                        input.copyTo(output)
+                    }
+                }
+                file.absolutePath
+            } catch (e: Exception) {
+                e.printStackTrace()
+                null
+            }
+        }
+    }
+}
