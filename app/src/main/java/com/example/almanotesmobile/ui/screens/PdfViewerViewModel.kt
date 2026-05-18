@@ -18,6 +18,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import com.example.almanotesmobile.utils.markNoteAsDownloaded
 
 sealed class PdfViewerState {
     data object Loading : PdfViewerState()
@@ -82,6 +83,7 @@ class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
                 // Conteggiamo l'apertura come un download/visualizzazione in ogni caso,
                 // anche se il file è stato caricato dall'utente.
                 repository.incrementDownload(noteId)
+                markNoteAsDownloaded(context, noteId)
                 _state.value = PdfViewerState.Ready(pages, note)
             }
         }

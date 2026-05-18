@@ -47,6 +47,12 @@ import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.NumberFormat
 import java.util.Locale
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.compose.ui.platform.LocalLifecycleOwner
+import kotlinx.coroutines.launch
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
@@ -86,7 +92,8 @@ private fun achievementText(points: Long): String {
 fun ProfileScreen(
     authViewModel:  AuthViewModel,
     onOpenNote:     (Long) -> Unit,
-    profileViewModel: ProfileViewModel = koinViewModel()
+    profileViewModel: ProfileViewModel = koinViewModel(),
+    onShowDownloadedNotes: () -> Unit
 ) {
     val almaRed = Color(0xFFBB2E29)
     val context = LocalContext.current
@@ -96,9 +103,28 @@ fun ProfileScreen(
     val profileImageUri by authViewModel.profileImageUri.collectAsStateWithLifecycle()
 
     // Note localmente in cache → "file scaricati"
-    LaunchedEffect(Unit) {
-        val ids = withContext(Dispatchers.IO) { getLocallyDownloadedNoteIds(context) }
-        profileViewModel.setDownloadedNoteIds(ids)
+    // Ottieni i riferimenti al ciclo di vita e al coroutine scope
+    val lifecycleOwner = LocalLifecycleOwner.current
+    val profileScope = rememberCoroutineScope()
+
+    // Note localmente in cache → "file scaricati".
+    // Aggiorna anche quando si torna dal visualizzatore PDF, perché la schermata
+    // profilo può restare nello stack e LaunchedEffect(Unit) non verrebbe rilanciato.
+    DisposableEffect(lifecycleOwner, context) {
+        fun refreshDownloadedNotes() {
+            profileScope.launch {
+                val ids = withContext(Dispatchers.IO) { getLocallyDownloadedNoteIds(context) }
+                profileViewModel.setDownloadedNoteIds(ids)
+            }
+        }
+
+        refreshDownloadedNotes()
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) refreshDownloadedNotes()
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
     }
     val uploadedNotes   by profileViewModel.uploadedNotes.collectAsStateWithLifecycle()
     val uploadedCount   by profileViewModel.uploadedCount.collectAsStateWithLifecycle()
@@ -216,7 +242,7 @@ fun ProfileScreen(
         // ── I file che hai scaricato ────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.Download, "I file che hai scaricato",
-                count = downloadedCount, showVedi = true, modifier = Modifier.padding(horizontal = 16.dp))
+                count = downloadedCount, showVedi = true, modifier = Modifier.padding(horizontal = 16.dp), onVediClick = onShowDownloadedNotes)
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
@@ -320,7 +346,8 @@ private fun ProfileSectionHeader(
     title:    String,
     count:    Int?,
     showVedi: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onVediClick: () -> Unit = {}
 ) {
     val almaRed = Color(0xFFBB2E29)
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -335,7 +362,7 @@ private fun ProfileSectionHeader(
         )
         if (showVedi) {
             OutlinedButton(
-                onClick        = { /* TODO: full list */ },
+                onClick        = onVediClick,
                 shape          = RoundedCornerShape(8.dp),
                 border         = androidx.compose.foundation.BorderStroke(1.dp, almaRed),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),

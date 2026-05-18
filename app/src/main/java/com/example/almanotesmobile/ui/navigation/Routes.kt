@@ -31,6 +31,9 @@ sealed interface Route {
     data object Reviews : Route
 
     @Serializable
+    data object DownloadedFiles : Route
+
+    @Serializable
     data object Theme : Route
 
     @Serializable
