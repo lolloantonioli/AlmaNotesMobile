@@ -150,8 +150,7 @@ class MainActivity : FragmentActivity() {
                         composable<Route.Profile> {
                             ProfileScreen(
                                 authViewModel = authViewModel,
-                                themeState = themeState,
-                                themeActions = themeViewModel.actions
+                                onOpenNote    = { noteId -> navController.navigate(Route.PdfViewer(noteId)) }
                             )
                         }
 

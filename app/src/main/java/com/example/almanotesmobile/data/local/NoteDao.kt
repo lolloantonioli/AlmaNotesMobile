@@ -46,4 +46,7 @@ interface NoteDao {
 
     @Delete
     suspend fun delete(note: Note)
+
+    @Query("SELECT * FROM notes WHERE id IN (:ids) ORDER BY uploadedAt DESC")
+    fun getNotesByIds(ids: List<Long>): Flow<List<Note>>
 }

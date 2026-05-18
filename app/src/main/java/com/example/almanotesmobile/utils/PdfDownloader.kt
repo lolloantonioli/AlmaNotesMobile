@@ -47,3 +47,12 @@ suspend fun downloadPdfToInternalStorage(
 /** Restituisce il File in cache per un dato noteId. */
 fun getPdfFile(context: Context, noteId: Long): File =
     File(context.filesDir, "pdfs/$noteId.pdf")
+
+/** Restituisce gli ID delle note di cui l'utente ha un PDF in cache locale. */
+fun getLocallyDownloadedNoteIds(context: Context): List<Long> {
+    val pdfDir = File(context.filesDir, "pdfs")
+    if (!pdfDir.exists()) return emptyList()
+    return pdfDir.listFiles()
+        ?.mapNotNull { it.nameWithoutExtension.toLongOrNull() }
+        ?: emptyList()
+}

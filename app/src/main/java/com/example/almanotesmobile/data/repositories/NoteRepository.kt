@@ -12,6 +12,9 @@ class NoteRepository(private val dao: NoteDao) {
     fun getDownloadedNotes(): Flow<List<Note>> = dao.getDownloadedNotes()
     fun getNotesByUploader(username: String): Flow<List<Note>> = dao.getNotesByUploader(username)
     fun countNotesByUploader(username: String): Flow<Int> = dao.countNotesByUploader(username)
+
+    fun getTopRated(limit: Int = 3): Flow<List<Note>>   = dao.getTopRated(limit)
+    fun getNotesByIds(ids: List<Long>): Flow<List<Note>> = dao.getNotesByIds(ids)
     
     suspend fun updateRating(id: Long, rating: Int) = dao.updateRating(id, rating)
     suspend fun insert(note: Note): Long  = dao.insert(note)
