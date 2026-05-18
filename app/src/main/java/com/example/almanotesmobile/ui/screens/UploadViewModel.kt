@@ -21,6 +21,7 @@ class UploadViewModel(private val repository: NoteRepository) : ViewModel() {
         description: String,
         professor: String,
         course: String,
+        uploaderName: String, // Passiamo lo username reale
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
@@ -30,9 +31,9 @@ class UploadViewModel(private val repository: NoteRepository) : ViewModel() {
                     title = title,
                     courseName = course,
                     professorName = professor,
-                    subject = course, // Using course as subject for now
+                    subject = course,
                     filePath = filePath,
-                    uploaderName = "Tu", // Default to current user
+                    uploaderName = uploaderName, // Salviamo il nome corretto
                     uploadedAt = System.currentTimeMillis()
                 )
                 repository.insert(newNote)

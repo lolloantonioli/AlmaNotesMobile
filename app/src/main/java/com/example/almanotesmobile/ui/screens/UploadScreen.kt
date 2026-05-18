@@ -9,7 +9,6 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,12 +21,14 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun UploadScreen(
     onUploadSuccess: () -> Unit,
+    authViewModel: AuthViewModel, // Passiamo AuthViewModel per l'uploaderName
     viewModel: UploadViewModel = koinViewModel()
 ) {
     var fileName by remember { mutableStateOf("") }
@@ -35,6 +36,8 @@ fun UploadScreen(
     var professor by remember { mutableStateOf("") }
     var degreeCourse by remember { mutableStateOf("") }
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+    
+    val uploaderName by authViewModel.username.collectAsStateWithLifecycle()
     
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
@@ -46,7 +49,6 @@ fun UploadScreen(
     ) { uri: Uri? -> selectedFileUri = uri }
 
     Box(modifier = Modifier.fillMaxSize()) {
-        // 1. Sfondo
         Image(
             painter = painterResource(id = R.drawable.sfondo),
             contentDescription = null,
@@ -54,7 +56,6 @@ fun UploadScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 2. Card Centrale
         Card(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -68,7 +69,6 @@ fun UploadScreen(
                 modifier = Modifier.padding(24.dp).fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                // Icona e Titolo
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Upload, null, tint = almaRed, modifier = Modifier.size(20.dp))
                     Spacer(Modifier.width(8.dp))
@@ -77,27 +77,16 @@ fun UploadScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // BLOCCO CAMPI UNITI
                 Column(modifier = Modifier.fillMaxWidth().border(1.dp, borderColor)) {
-
                     InputFieldPlaceholder(value = fileName, onValueChange = { fileName = it }, placeholder = "Nome Appunto")
-
-                    HorizontalDivider(color = borderColor) // Usa HorizontalDivider invece di Divider (deprecato)
-
+                    HorizontalDivider(color = borderColor)
                     InputFieldPlaceholder(value = description, onValueChange = { description = it }, placeholder = "Descrizione")
-
                     HorizontalDivider(color = borderColor)
-
-                    // SOSTITUITI I FINTI DROPDOWN CON CAMPI DI TESTO VERI
                     InputFieldPlaceholder(value = professor, onValueChange = { professor = it }, placeholder = "Professore (Es. Rossi)")
-
                     HorizontalDivider(color = borderColor)
-
                     InputFieldPlaceholder(value = degreeCourse, onValueChange = { degreeCourse = it }, placeholder = "Corso di Laurea (Es. Informatica)")
-
                     HorizontalDivider(color = borderColor)
-
-                    // Box Selezione File (Questo andava bene!)
+                    
                     Row(
                         modifier = Modifier.fillMaxWidth().height(45.dp).background(Color.White),
                         verticalAlignment = Alignment.CenterVertically
@@ -123,7 +112,6 @@ fun UploadScreen(
 
                 Spacer(Modifier.height(32.dp))
 
-                // Bottone Carica
                 Button(
                     onClick = {
                         if (selectedFileUri != null && fileName.isNotBlank()) {
@@ -134,6 +122,7 @@ fun UploadScreen(
                                 description = description,
                                 professor = professor.ifEmpty { "Generico" },
                                 course = degreeCourse.ifEmpty { "Generico" },
+                                uploaderName = uploaderName, // Username REALE
                                 onSuccess = onUploadSuccess
                             )
                         }
@@ -146,34 +135,5 @@ fun UploadScreen(
                 }
             }
         }
-    }
-}
-
-@Composable
-fun InputFieldPlaceholder(value: String, onValueChange: (String) -> Unit, placeholder: String) {
-    TextField(
-        value = value,
-        onValueChange = onValueChange,
-        placeholder = { Text(placeholder, fontSize = 14.sp, color = Color.Gray) },
-        modifier = Modifier.fillMaxWidth().height(45.dp),
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = Color.White,
-            unfocusedContainerColor = Color.White,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent
-        ),
-        singleLine = true
-    )
-}
-
-@Composable
-fun DropdownPlaceholder(text: String, arrowColor: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth().height(45.dp).background(Color.White).padding(horizontal = 12.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(text, fontSize = 14.sp, color = Color.Gray)
-        Icon(Icons.Default.KeyboardArrowDown, null, tint = arrowColor)
     }
 }

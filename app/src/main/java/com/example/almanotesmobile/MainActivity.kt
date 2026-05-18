@@ -128,16 +128,13 @@ class MainActivity : FragmentActivity() {
                                     navController.navigate(Route.Home) {
                                         popUpTo(Route.Home) { inclusive = false }
                                     }
-                                }
+                                },
+                                authViewModel = authViewModel
                             )
                         }
 
                         composable<Route.Reviews> {
                             ReviewsScreen()
-                        }
-
-                        composable<Route.Favourites> {
-                            Greeting(name = "Preferiti")
                         }
 
                         composable<Route.Theme> {
@@ -166,12 +163,4 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    androidx.compose.material3.Text(
-        text = "Benvenuto in $name!",
-        modifier = modifier
-    )
 }
