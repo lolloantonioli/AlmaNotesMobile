@@ -41,6 +41,8 @@ import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
 import com.example.almanotesmobile.utils.getLocallyDownloadedNoteIds
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.NumberFormat
@@ -94,11 +96,10 @@ fun ProfileScreen(
     val profileImageUri by authViewModel.profileImageUri.collectAsStateWithLifecycle()
 
     // Note localmente in cache → "file scaricati"
-    val localIds = remember(context) { getLocallyDownloadedNoteIds(context) }
-
-    LaunchedEffect(username)  { if (username.isNotBlank()) profileViewModel.setUsername(username) }
-    LaunchedEffect(localIds)  { profileViewModel.setDownloadedNoteIds(localIds) }
-
+    LaunchedEffect(Unit) {
+        val ids = withContext(Dispatchers.IO) { getLocallyDownloadedNoteIds(context) }
+        profileViewModel.setDownloadedNoteIds(ids)
+    }
     val uploadedNotes   by profileViewModel.uploadedNotes.collectAsStateWithLifecycle()
     val uploadedCount   by profileViewModel.uploadedCount.collectAsStateWithLifecycle()
     val downloadedNotes by profileViewModel.downloadedNotes.collectAsStateWithLifecycle()

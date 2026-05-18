@@ -3,54 +3,71 @@ package com.example.almanotesmobile.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class ProfileViewModel(private val repository: NoteRepository) : ViewModel() {
+class ProfileViewModel(
+    private val noteRepository: NoteRepository,
+    private val authRepository: AuthRepository   // <-- iniettato direttamente
+) : ViewModel() {
 
-    private val _username = MutableStateFlow("")
+    // Username letto da DataStore: nessun rischio di timing,
+    // si aggiorna in automatico quando cambia
+    private val username: Flow<String> = authRepository.username
 
-    fun setUsername(username: String) {
-        if (_username.value != username) _username.value = username
+    // ── ID dei PDF in cache locale (impostati da ProfileScreen) ──────────────
+    private val _downloadedIds = MutableStateFlow<List<Long>>(emptyList())
+
+    fun setDownloadedNoteIds(ids: List<Long>) {
+        _downloadedIds.value = ids
     }
 
-    // Caricati: filtrati per il tuo username reale
-    val uploadedNotes: StateFlow<List<Note>> = _username
+    // ── I file che hai caricato ───────────────────────────────────────────────
+    // Reattivo: quando viene inserita una nuova nota, Room notifica il Flow
+    val uploadedNotes: StateFlow<List<Note>> = username
         .flatMapLatest { u ->
             if (u.isBlank()) flowOf(emptyList())
-            else repository.getNotesByUploader(u).map { it.take(3) }
+            else noteRepository.getNotesByUploader(u).map { it.take(3) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val uploadedCount: StateFlow<Int> = _username
+    val uploadedCount: StateFlow<Int> = username
         .flatMapLatest { u ->
             if (u.isBlank()) flowOf(0)
-            else repository.countNotesByUploader(u)
+            else noteRepository.countNotesByUploader(u)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    // Scaricati: tutti i file che hanno almeno 1 download (visto che l'app è locale)
-    val downloadedNotes: StateFlow<List<Note>> = repository.getDownloadedNotes()
-        .map { it.take(3) }
+    // ── I file che hai scaricato (PDF in cache locale) ────────────────────────
+    val downloadedNotes: StateFlow<List<Note>> = _downloadedIds
+        .flatMapLatest { ids ->
+            if (ids.isEmpty()) flowOf(emptyList())
+            else noteRepository.getNotesByIds(ids).map { it.take(3) }
+        }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val downloadedCount: StateFlow<Int> = repository.getDownloadedNotes()
+    val downloadedCount: StateFlow<Int> = _downloadedIds
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    val topDownloaded: StateFlow<List<Note>> = repository.getTopDownloaded(3)
+    // ── I più popolari ────────────────────────────────────────────────────────
+    val topDownloaded: StateFlow<List<Note>> = noteRepository.getTopDownloaded(3)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val topRated: StateFlow<List<Note>> = repository.getTopRated(3)
+    // ── I fan favourites ──────────────────────────────────────────────────────
+    val topRated: StateFlow<List<Note>> = noteRepository.getTopRated(3)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val totalPoints: StateFlow<Long> = _username
+    // ── Punti: 1.000 per file caricato + 100 per ogni visualizzazione ricevuta ─
+    val totalPoints: StateFlow<Long> = username
         .flatMapLatest { u ->
             if (u.isBlank()) flowOf(0L)
-            else repository.getNotesByUploader(u).map { notes ->
-                notes.size.toLong() * 1000L + notes.sumOf { it.downloadCount.toLong() } * 100L
+            else noteRepository.getNotesByUploader(u).map { notes ->
+                notes.size.toLong() * 1_000L +
+                        notes.sumOf { it.downloadCount.toLong() } * 100L
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0L)
