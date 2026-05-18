@@ -120,6 +120,13 @@ class MainActivity : FragmentActivity() {
                             )
                         }
 
+                        composable<Route.UploadedFiles> {
+                            UploadedFilesScreen(
+                                onOpenNote = { noteId -> navController.navigate(Route.PdfViewer(noteId)) }
+                            )
+                        }
+
+
 
                         composable<Route.Search> {
                             SearchScreen(
@@ -155,6 +162,7 @@ class MainActivity : FragmentActivity() {
                             ProfileScreen(
                                 authViewModel = authViewModel,
                                 onOpenNote    = { noteId -> navController.navigate(Route.PdfViewer(noteId)) },
+                                onShowUploadedNotes = { navController.navigate(Route.UploadedFiles) },
                                 onShowDownloadedNotes = { navController.navigate(Route.DownloadedFiles) }
                             )
                         }

@@ -93,6 +93,7 @@ fun ProfileScreen(
     authViewModel:  AuthViewModel,
     onOpenNote:     (Long) -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel(),
+    onShowUploadedNotes: () -> Unit,
     onShowDownloadedNotes: () -> Unit
 ) {
     val almaRed = Color(0xFFBB2E29)
@@ -225,7 +226,7 @@ fun ProfileScreen(
         // ── I file che hai caricato ─────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.Upload, "I file che hai caricato",
-                count = uploadedCount, showVedi = true, modifier = Modifier.padding(horizontal = 16.dp))
+                count = uploadedCount, showVedi = true, onVediClick = onShowUploadedNotes, modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
