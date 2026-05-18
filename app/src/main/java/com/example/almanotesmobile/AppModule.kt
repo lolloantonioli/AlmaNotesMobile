@@ -44,9 +44,5 @@ val appModule = module {
     viewModel { UploadViewModel(get()) }
     viewModel { SearchViewModel(get()) }
     viewModel { ReviewsViewModel(get()) }
-    viewModel { ProfileViewModel(get()) }
-    // Prima:
-    viewModel { ProfileViewModel(get()) }
-// Dopo (aggiunge AuthRepository):
     viewModel { ProfileViewModel(get(), get()) }
 }

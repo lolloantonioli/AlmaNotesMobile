@@ -24,6 +24,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import org.koin.androidx.compose.koinViewModel
+import androidx.compose.material3.Text
+
 
 @Composable
 fun UploadScreen(
@@ -136,4 +138,26 @@ fun UploadScreen(
             }
         }
     }
+}
+
+@Composable
+fun InputFieldPlaceholder(
+    value: String,
+    onValueChange: (String) -> Unit,
+    placeholder: String
+) {
+    TextField(
+        value = value,
+        onValueChange = onValueChange,
+        placeholder = { Text(text = placeholder, fontSize = 14.sp, color = Color.Gray) },
+        modifier = Modifier.fillMaxWidth(),
+        colors = TextFieldDefaults.colors(
+            focusedContainerColor = Color.White,
+            unfocusedContainerColor = Color.White,
+            disabledContainerColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+        ),
+        singleLine = true
+    )
 }
