@@ -1,6 +1,7 @@
 package com.example.almanotesmobile.ui.screens
 
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -8,6 +9,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ErrorOutline
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -23,6 +25,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -34,6 +37,7 @@ fun PdfViewerScreen(
 ) {
     val context = LocalContext.current
     val state   by viewModel.state.collectAsStateWithLifecycle()
+    val screenScope = rememberCoroutineScope()
 
     LaunchedEffect(noteId) { viewModel.load(noteId, context) }
 
@@ -56,6 +60,26 @@ fun PdfViewerScreen(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                         contentDescription = "Indietro"
                     )
+                }
+            },
+            actions = {
+                val ready = state is PdfViewerState.Ready
+                IconButton(
+                    onClick = {
+                        if (ready) {
+                            screenScope.launch {
+                                val ok = viewModel.saveCurrentPdfToDownloads(noteId, context)
+                                Toast.makeText(
+                                    context,
+                                    if (ok) "PDF salvato in Download/AlmaNotes" else "Impossibile salvare il PDF",
+                                    if (ok) Toast.LENGTH_SHORT else Toast.LENGTH_LONG
+                                ).show()
+                            }
+                        }
+                    },
+                    enabled = ready
+                ) {
+                    Icon(Icons.Default.Download, contentDescription = "Scarica PDF")
                 }
             },
             colors = TopAppBarDefaults.topAppBarColors(
@@ -81,9 +105,6 @@ fun PdfViewerScreen(
         }
     }
 }
-
-// ─── Pagine ───────────────────────────────────────────────────────────────────
-
 @Composable
 private fun PdfPages(pages: List<Bitmap>) {
     LazyColumn(

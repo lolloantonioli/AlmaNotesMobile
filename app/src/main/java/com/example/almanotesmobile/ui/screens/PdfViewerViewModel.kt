@@ -20,6 +20,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import android.content.ContentValues
+import android.os.Build
+import android.provider.MediaStore
+
 
 sealed class PdfViewerState {
     data object Loading : PdfViewerState()
@@ -94,6 +98,48 @@ class PdfViewerViewModel(
         }
     }
 
+    suspend fun saveCurrentPdfToDownloads(noteId: Long, context: Context): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val note = repository.getNoteById(noteId) ?: return@withContext false
+
+            val localFile = File(note.filePath)
+            val pdfFile = if (localFile.exists() && localFile.isFile) localFile else getPdfFile(context, noteId)
+            if (!pdfFile.exists()) return@withContext false
+
+            val resolver = context.contentResolver
+            val safeTitle = note.title.replace(Regex("[^a-zA-Z0-9._-]"), "_").ifBlank { "appunto_$noteId" }
+            val fileName = if (safeTitle.endsWith(".pdf", ignoreCase = true)) safeTitle else "$safeTitle.pdf"
+
+            val values = ContentValues().apply {
+                put(MediaStore.Downloads.DISPLAY_NAME, fileName)
+                put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    put(MediaStore.Downloads.RELATIVE_PATH, "Download/AlmaNotes")
+                    put(MediaStore.Downloads.IS_PENDING, 1)
+                }
+            }
+
+            val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return@withContext false
+
+            resolver.openOutputStream(uri)?.use { output ->
+                pdfFile.inputStream().use { input ->
+                    input.copyTo(output)
+                }
+            } ?: return@withContext false
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                val complete = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
+                resolver.update(uri, complete, null, null)
+            }
+
+            repository.incrementDownload(noteId)
+            markNoteAsDownloaded(context, noteId)
+            authRepository.markNoteAsDownloaded(noteId)
+            true
+        } catch (_: Exception) {
+            false
+        }
+    }
     private suspend fun renderPages(
         file: File,
         onProgress: (Int) -> Unit
