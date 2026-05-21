@@ -36,17 +36,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
-import com.example.almanotesmobile.utils.getLocallyDownloadedNoteIds
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.NumberFormat
@@ -90,9 +83,9 @@ private fun achievementText(points: Long): String {
 fun ProfileScreen(
     authViewModel:  AuthViewModel,
     onOpenNote:     (Long) -> Unit,
-    onShowUploadedNotes: () -> Unit,
-    onShowDownloadedNotes: () -> Unit,
-    onShowBadges: () -> Unit,
+    onNavigateToUploaded: () -> Unit,
+    onNavigateToDownloaded: () -> Unit,
+    onNavigateToBadges: () -> Unit,
     profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val almaRed = Color(0xFFBB2E29)
@@ -102,28 +95,8 @@ fun ProfileScreen(
     val email           by authViewModel.email.collectAsStateWithLifecycle()
     val profileImageUri by authViewModel.profileImageUri.collectAsStateWithLifecycle()
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val profileScope = rememberCoroutineScope()
+    LaunchedEffect(username)  { if (username.isNotBlank()) profileViewModel.setUsername(username) }
 
-    // Note localmente in cache → "file scaricati".
-    // Aggiorna anche quando si torna dal visualizzatore PDF, perché la schermata
-    // profilo può restare nello stack e LaunchedEffect(Unit) non verrebbe rilanciato.
-    DisposableEffect(lifecycleOwner, context) {
-        fun refreshDownloadedNotes() {
-            profileScope.launch {
-                val ids = withContext(Dispatchers.IO) { getLocallyDownloadedNoteIds(context) }
-                profileViewModel.setDownloadedNoteIds(ids)
-            }
-        }
-
-        refreshDownloadedNotes()
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) refreshDownloadedNotes()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
     val uploadedNotes   by profileViewModel.uploadedNotes.collectAsStateWithLifecycle()
     val uploadedCount   by profileViewModel.uploadedCount.collectAsStateWithLifecycle()
     val downloadedNotes by profileViewModel.downloadedNotes.collectAsStateWithLifecycle()
@@ -223,8 +196,7 @@ fun ProfileScreen(
         // ── I file che hai caricato ─────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.Upload, "I file che hai caricato",
-                count = uploadedCount, showVedi = true, onVediClick = onShowUploadedNotes,
-                modifier = Modifier.padding(horizontal = 16.dp))
+                count = uploadedCount, onVediClick = onNavigateToUploaded, modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
@@ -241,13 +213,12 @@ fun ProfileScreen(
         // ── I file che hai scaricato ────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.Download, "I file che hai scaricato",
-                count = downloadedCount, showVedi = true, onVediClick = onShowDownloadedNotes,
-                modifier = Modifier.padding(horizontal = 16.dp))
+                count = downloadedCount, onVediClick = onNavigateToDownloaded, modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
             if (downloadedNotes.isEmpty())
-                ProfileEmptyState("Non hai ancora scaricato appunti", Modifier.padding(horizontal = 16.dp))
+                ProfileEmptyState("Non hai ancora scaricato alcun appunto", Modifier.padding(horizontal = 16.dp))
             else
                 ProfileNoteCard(downloadedNotes, Modifier.padding(horizontal = 16.dp)) { note ->
                     DownloadedProfileRow(note) { selectedNote = note }
@@ -259,7 +230,7 @@ fun ProfileScreen(
         // ── I più popolari ──────────────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.TrendingUp, "I più popolari",
-                count = null, showVedi = false, modifier = Modifier.padding(horizontal = 16.dp))
+                count = null, onVediClick = {}, showVedi = false, modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
@@ -273,7 +244,7 @@ fun ProfileScreen(
         // ── I fan favourites ────────────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Outlined.Star, "I fan favourites",
-                count = null, showVedi = false, modifier = Modifier.padding(horizontal = 16.dp))
+                count = null, onVediClick = {}, showVedi = false, modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
@@ -287,8 +258,7 @@ fun ProfileScreen(
         // ── I tuoi traguardi ────────────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.EmojiEvents, "I tuoi traguardi",
-                count = null, showVedi = true, onVediClick = onShowBadges,
-                modifier = Modifier.padding(horizontal = 16.dp))
+                count = null, onVediClick = onNavigateToBadges, modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item { AchievementCard(totalPoints, Modifier.padding(horizontal = 16.dp)) }
@@ -339,16 +309,14 @@ fun ProfileScreen(
     }
 }
 
-// ─── Section header ───────────────────────────────────────────────────────────
-
 @Composable
 private fun ProfileSectionHeader(
     icon:     ImageVector,
     title:    String,
     count:    Int?,
-    showVedi: Boolean,
-    modifier: Modifier = Modifier,
-    onVediClick: () -> Unit = {}
+    onVediClick: () -> Unit,
+    showVedi: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     val almaRed = Color(0xFFBB2E29)
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -372,8 +340,6 @@ private fun ProfileSectionHeader(
         }
     }
 }
-
-// ─── Note card wrapper ────────────────────────────────────────────────────────
 
 @Composable
 private fun ProfileNoteCard(
@@ -404,9 +370,6 @@ private fun ProfileEmptyState(message: String, modifier: Modifier = Modifier) {
     }
 }
 
-// ─── Note rows ────────────────────────────────────────────────────────────────
-
-/** File caricati: titolo + prof/materia | tempo fa */
 @Composable
 private fun UploadedProfileRow(note: Note, onClick: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().clickable { onClick() }
@@ -415,7 +378,7 @@ private fun UploadedProfileRow(note: Note, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(note.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = Color.Gray,
+            Text("${note.professorName} - ${note.courseName}", fontSize = 11.sp, color = Color.Gray,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Text(note.uploadedAt.toRelativeTimeString(),
@@ -423,7 +386,6 @@ private fun UploadedProfileRow(note: Note, onClick: () -> Unit) {
     }
 }
 
-/** File scaricati: titolo + prof/materia + uploader | tempo fa */
 @Composable
 private fun DownloadedProfileRow(note: Note, onClick: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().clickable { onClick() }
@@ -432,7 +394,7 @@ private fun DownloadedProfileRow(note: Note, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(note.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = Color.Gray,
+            Text("${note.professorName} - ${note.courseName}", fontSize = 11.sp, color = Color.Gray,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -446,7 +408,6 @@ private fun DownloadedProfileRow(note: Note, onClick: () -> Unit) {
     }
 }
 
-/** Popolari / Fan favourites: titolo + prof/materia + download | rating */
 @Composable
 private fun PopularProfileRow(note: Note, onClick: () -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().clickable { onClick() }
@@ -455,7 +416,7 @@ private fun PopularProfileRow(note: Note, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(note.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = Color.Gray,
+            Text("${note.professorName} - ${note.courseName}", fontSize = 11.sp, color = Color.Gray,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
@@ -474,8 +435,6 @@ private fun PopularProfileRow(note: Note, onClick: () -> Unit) {
     }
 }
 
-// ─── Achievement card ─────────────────────────────────────────────────────────
-
 @Composable
 private fun AchievementCard(points: Long, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
@@ -490,8 +449,6 @@ private fun AchievementCard(points: Long, modifier: Modifier = Modifier) {
         }
     }
 }
-
-// ─── Riga credenziale ────────────────────────────────────────────────────────
 
 @Composable
 fun CredentialRow(icon: ImageVector, label: String, value: String, isPassword: Boolean = false) {
