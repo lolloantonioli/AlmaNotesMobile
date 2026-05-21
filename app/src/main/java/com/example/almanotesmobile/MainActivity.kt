@@ -12,7 +12,6 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavDestination.Companion.hasRoute
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -40,10 +39,8 @@ class MainActivity : FragmentActivity() {
 
             val navController = rememberNavController()
             val navBackStackEntry by navController.currentBackStackEntryAsState()
-            val destination = navBackStackEntry?.destination
-            
-            // Verifichiamo se nascondere le barre (es. nel visualizzatore PDF o login)
-            val isPdfViewer = destination?.hasRoute<Route.PdfViewer>() ?: false
+            val currentRoute = navBackStackEntry?.destination?.route ?: ""
+            val isPdfViewer  = currentRoute.contains("PdfViewer")
 
             AlmaNotesMobileTheme(
                 darkTheme = when (themeState.theme) {
@@ -107,31 +104,14 @@ class MainActivity : FragmentActivity() {
                         composable<Route.Home> {
                             HomeScreen(
                                 onSearchClick = {
-                                    navController.navigate(Route.Search) { launchSingleTop = true }
-                                },
-                                onOpenNote = { noteId -> navController.navigate(Route.PdfViewer(noteId)) }
-                            )
-                        }
-
-                        composable<Route.Search> {
-                            SearchScreen(
-                                onOpenNote = { noteId -> navController.navigate(Route.PdfViewer(noteId)) }
-                            )
-                        }
-
-                        composable<Route.Upload> {
-                            UploadScreen(
-                                onUploadSuccess = {
-                                    navController.navigate(Route.Home) {
-                                        popUpTo(Route.Home) { inclusive = false }
+                                    navController.navigate(Route.Search) {
+                                        launchSingleTop = true
                                     }
                                 },
-                                authViewModel = authViewModel
+                                onOpenNote = { noteId ->
+                                    navController.navigate(Route.PdfViewer(noteId))
+                                }
                             )
-                        }
-
-                        composable<Route.Reviews> {
-                            ReviewsScreen()
                         }
 
                         composable<Route.DownloadedFiles> {
@@ -150,6 +130,30 @@ class MainActivity : FragmentActivity() {
                             BadgesScreen()
                         }
 
+
+                        composable<Route.Search> {
+                            SearchScreen(
+                                onOpenNote = { noteId ->
+                                    navController.navigate(Route.PdfViewer(noteId))
+                                }
+                            )
+                        }
+
+                        composable<Route.Upload> {
+                            UploadScreen(
+                                onUploadSuccess = {
+                                    navController.navigate(Route.Home) {
+                                        popUpTo(Route.Home) { inclusive = false }
+                                    }
+                                },
+                                authViewModel = authViewModel
+                            )
+                        }
+
+                        composable<Route.Reviews> {
+                            ReviewsScreen()
+                        }
+
                         composable<Route.Theme> {
                             ThemeScreen(
                                 themeState = themeState,
@@ -161,9 +165,9 @@ class MainActivity : FragmentActivity() {
                             ProfileScreen(
                                 authViewModel = authViewModel,
                                 onOpenNote    = { noteId -> navController.navigate(Route.PdfViewer(noteId)) },
-                                onNavigateToUploaded = { navController.navigate(Route.UploadedFiles) },
-                                onNavigateToDownloaded = { navController.navigate(Route.DownloadedFiles) },
-                                onNavigateToBadges = { navController.navigate(Route.Badges) }
+                                onShowUploadedNotes = { navController.navigate(Route.UploadedFiles) },
+                                onShowDownloadedNotes = { navController.navigate(Route.DownloadedFiles) } ,
+                                onShowBadges = { navController.navigate(Route.Badges) }
                             )
                         }
 
@@ -179,12 +183,4 @@ class MainActivity : FragmentActivity() {
             }
         }
     }
-}
-
-@Composable
-fun Greeting(name: String, modifier: Modifier = Modifier) {
-    androidx.compose.material3.Text(
-        text = "Benvenuto in $name!",
-        modifier = modifier
-    )
 }
