@@ -126,6 +126,9 @@ class MainActivity : FragmentActivity() {
                             )
                         }
 
+                        composable<Route.Badges> {
+                            BadgesScreen()
+                        }
 
 
                         composable<Route.Search> {
@@ -163,7 +166,8 @@ class MainActivity : FragmentActivity() {
                                 authViewModel = authViewModel,
                                 onOpenNote    = { noteId -> navController.navigate(Route.PdfViewer(noteId)) },
                                 onShowUploadedNotes = { navController.navigate(Route.UploadedFiles) },
-                                onShowDownloadedNotes = { navController.navigate(Route.DownloadedFiles) }
+                                onShowDownloadedNotes = { navController.navigate(Route.DownloadedFiles) } ,
+                                onShowBadges = { navController.navigate(Route.Badges) }
                             )
                         }
 

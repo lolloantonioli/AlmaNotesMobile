@@ -37,6 +37,9 @@ sealed interface Route {
     data object UploadedFiles : Route
 
     @Serializable
+    data object Badges : Route
+
+    @Serializable
     data object Theme : Route
 
     @Serializable

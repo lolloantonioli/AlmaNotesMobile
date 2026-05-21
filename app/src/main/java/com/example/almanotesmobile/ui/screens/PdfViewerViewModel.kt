@@ -8,9 +8,11 @@ import android.os.ParcelFileDescriptor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.utils.downloadPdfToInternalStorage
 import com.example.almanotesmobile.utils.getPdfFile
+import com.example.almanotesmobile.utils.markNoteAsDownloaded
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,7 +20,6 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
-import com.example.almanotesmobile.utils.markNoteAsDownloaded
 
 sealed class PdfViewerState {
     data object Loading : PdfViewerState()
@@ -28,7 +29,10 @@ sealed class PdfViewerState {
     data class Error(val message: String) : PdfViewerState()
 }
 
-class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
+class PdfViewerViewModel(
+    private val repository: NoteRepository,
+    private val authRepository: AuthRepository
+) : ViewModel() {
 
     private val _state = MutableStateFlow<PdfViewerState>(PdfViewerState.Loading)
     val state: StateFlow<PdfViewerState> = _state.asStateFlow()
@@ -59,7 +63,7 @@ class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
                     _state.value = PdfViewerState.Error("Nessun file disponibile localmente e URL non valido")
                     return@launch
                 }
-                
+
                 _state.value = PdfViewerState.Downloading(0)
                 val downloaded = downloadPdfToInternalStorage(
                     context    = context,
@@ -84,6 +88,7 @@ class PdfViewerViewModel(private val repository: NoteRepository) : ViewModel() {
                 // anche se il file è stato caricato dall'utente.
                 repository.incrementDownload(noteId)
                 markNoteAsDownloaded(context, noteId)
+                authRepository.markNoteAsDownloaded(noteId)
                 _state.value = PdfViewerState.Ready(pages, note)
             }
         }

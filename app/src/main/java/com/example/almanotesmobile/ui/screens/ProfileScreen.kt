@@ -36,23 +36,21 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
 import com.example.almanotesmobile.utils.getLocallyDownloadedNoteIds
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.NumberFormat
 import java.util.Locale
-import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.compose.ui.platform.LocalLifecycleOwner
-import kotlinx.coroutines.launch
 
 // ─── Utility ──────────────────────────────────────────────────────────────────
 
@@ -92,9 +90,10 @@ private fun achievementText(points: Long): String {
 fun ProfileScreen(
     authViewModel:  AuthViewModel,
     onOpenNote:     (Long) -> Unit,
-    profileViewModel: ProfileViewModel = koinViewModel(),
     onShowUploadedNotes: () -> Unit,
-    onShowDownloadedNotes: () -> Unit
+    onShowDownloadedNotes: () -> Unit,
+    onShowBadges: () -> Unit,
+    profileViewModel: ProfileViewModel = koinViewModel()
 ) {
     val almaRed = Color(0xFFBB2E29)
     val context = LocalContext.current
@@ -103,8 +102,6 @@ fun ProfileScreen(
     val email           by authViewModel.email.collectAsStateWithLifecycle()
     val profileImageUri by authViewModel.profileImageUri.collectAsStateWithLifecycle()
 
-    // Note localmente in cache → "file scaricati"
-    // Ottieni i riferimenti al ciclo di vita e al coroutine scope
     val lifecycleOwner = LocalLifecycleOwner.current
     val profileScope = rememberCoroutineScope()
 
@@ -226,7 +223,8 @@ fun ProfileScreen(
         // ── I file che hai caricato ─────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.Upload, "I file che hai caricato",
-                count = uploadedCount, showVedi = true, onVediClick = onShowUploadedNotes, modifier = Modifier.padding(horizontal = 16.dp))
+                count = uploadedCount, showVedi = true, onVediClick = onShowUploadedNotes,
+                modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
@@ -243,7 +241,8 @@ fun ProfileScreen(
         // ── I file che hai scaricato ────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.Download, "I file che hai scaricato",
-                count = downloadedCount, showVedi = true, modifier = Modifier.padding(horizontal = 16.dp), onVediClick = onShowDownloadedNotes)
+                count = downloadedCount, showVedi = true, onVediClick = onShowDownloadedNotes,
+                modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item {
@@ -288,7 +287,8 @@ fun ProfileScreen(
         // ── I tuoi traguardi ────────────────────────────────────────────────
         item {
             ProfileSectionHeader(Icons.Default.EmojiEvents, "I tuoi traguardi",
-                count = null, showVedi = true, modifier = Modifier.padding(horizontal = 16.dp))
+                count = null, showVedi = true, onVediClick = onShowBadges,
+                modifier = Modifier.padding(horizontal = 16.dp))
         }
         item { Spacer(Modifier.height(8.dp)) }
         item { AchievementCard(totalPoints, Modifier.padding(horizontal = 16.dp)) }

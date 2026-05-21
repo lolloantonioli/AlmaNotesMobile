@@ -66,7 +66,6 @@ fun markNoteAsDownloaded(context: Context, noteId: Long) {
         .commit()
 }
 
-
 /** Restituisce gli ID delle note di cui l'utente ha un PDF in cache locale. */
 fun getLocallyDownloadedNoteIds(context: Context): List<Long> {
     val prefs = context.getSharedPreferences(DOWNLOADED_NOTES_PREFS, Context.MODE_PRIVATE)

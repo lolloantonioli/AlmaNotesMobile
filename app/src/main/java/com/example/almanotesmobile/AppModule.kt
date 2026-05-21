@@ -37,14 +37,15 @@ val appModule = module {
     }
     single { get<NoteDatabase>().noteDao() }
     single { NoteRepository(get()) }
-    
+
     // ViewModels
     viewModel { HomeViewModel(get()) }
-    viewModel { PdfViewerViewModel(get()) }
+    viewModel { PdfViewerViewModel(get(), get()) }
     viewModel { UploadViewModel(get()) }
     viewModel { SearchViewModel(get()) }
-    viewModel { ReviewsViewModel(get()) }
+    viewModel { ReviewsViewModel(get(), get()) }
     viewModel { DownloadedFilesViewModel(get()) }
     viewModel { UploadedFilesViewModel(get(), get()) }
+    viewModel { BadgesViewModel(get(), get()) }
     viewModel { ProfileViewModel(get(), get()) }
 }
