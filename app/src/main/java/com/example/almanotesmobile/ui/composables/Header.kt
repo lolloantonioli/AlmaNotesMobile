@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material3.*
 import com.example.almanotesmobile.R
@@ -22,13 +23,24 @@ import com.example.almanotesmobile.ui.navigation.Route
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun AppBar(navController: NavController) {
+fun AppBar(navController: NavController, showBack: Boolean, onBack: () -> Unit) {
     val backgroundColor = Color(0xFFBB2E29)
     val merriweatherSans = FontFamily(
         Font(R.font.merriweathersans_variablefont_wght, FontWeight.Normal),
     )
 
     CenterAlignedTopAppBar(
+        navigationIcon = {
+            if (showBack) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = "Indietro",
+                        tint = backgroundColor
+                    )
+                }
+            }
+        },
         title = {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(

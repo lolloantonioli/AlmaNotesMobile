@@ -32,7 +32,7 @@ class MainActivity : FragmentActivity() {
         setContent {
             val authViewModel = koinViewModel<AuthViewModel>()
             val themeViewModel = koinViewModel<ThemeViewModel>()
-            
+
             val isRegistered by authViewModel.isRegistered.collectAsStateWithLifecycle()
             val isLoggedIn by authViewModel.isLoggedIn.collectAsStateWithLifecycle()
             val themeState by themeViewModel.state.collectAsStateWithLifecycle()
@@ -41,6 +41,11 @@ class MainActivity : FragmentActivity() {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentRoute = navBackStackEntry?.destination?.route ?: ""
             val isPdfViewer  = currentRoute.contains("PdfViewer")
+
+            val showHeaderBack = currentRoute.contains("DownloadedFiles") ||
+                    currentRoute.contains("UploadedFiles") ||
+                    currentRoute.contains("Badges") ||
+                    currentRoute.contains("Theme")
 
             AlmaNotesMobileTheme(
                 darkTheme = when (themeState.theme) {
@@ -62,8 +67,13 @@ class MainActivity : FragmentActivity() {
 
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    topBar = { 
-                        if (isLoggedIn && !isPdfViewer) AppBar(navController = navController)
+                    topBar = {
+                        if (isLoggedIn && !isPdfViewer) {
+                            AppBar(
+                                navController = navController,
+                                showBack = showHeaderBack,
+                                onBack = { navController.popBackStack() })
+                        }
                     },
                     bottomBar = { 
                         if (isLoggedIn && !isPdfViewer) {

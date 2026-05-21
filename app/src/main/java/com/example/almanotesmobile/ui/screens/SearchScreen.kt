@@ -25,8 +25,8 @@ import org.koin.androidx.compose.koinViewModel
 
 @Composable
 fun SearchScreen(
-    onOpenNote: (Long) -> Unit,
-    viewModel: SearchViewModel = koinViewModel()
+                 onOpenNote: (Long) -> Unit,
+                 viewModel: SearchViewModel = koinViewModel()
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
@@ -34,67 +34,67 @@ fun SearchScreen(
     
     // Stato per gestire la nota selezionata e mostrare il dialog
     var selectedNote by remember { mutableStateOf<Note?>(null) }
-
+    
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFFF5F5F5))
+    modifier = Modifier
+    .fillMaxSize()
+    .background(MaterialTheme.colorScheme.background)
     ) {
         // 1. Barra di Ricerca
         Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            shape = RoundedCornerShape(8.dp),
-            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-            colors = CardDefaults.cardColors(containerColor = Color.White)
+        modifier = Modifier
+        .fillMaxWidth()
+        .padding(16.dp),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
         ) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 12.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(Icons.Default.Search, contentDescription = null, tint = Color.Gray, modifier = Modifier.size(20.dp))
                 Spacer(Modifier.width(12.dp))
                 BasicTextField(
-                    value = searchQuery,
-                    onValueChange = { viewModel.onSearchQueryChanged(it) },
-                    modifier = Modifier.weight(1f),
-                    decorationBox = { innerTextField ->
-                        if (searchQuery.isEmpty()) {
-                            Text("Risultato di ricerca", color = Color.Gray, fontSize = 16.sp)
-                        }
-                        innerTextField()
+                value = searchQuery,
+                onValueChange = { viewModel.onSearchQueryChanged(it) },
+                modifier = Modifier.weight(1f),
+                decorationBox = { innerTextField ->
+                    if (searchQuery.isEmpty()) {
+                        Text("Risultato di ricerca", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
                     }
+                    innerTextField()
+                }
                 )
             }
         }
-
+        
         Spacer(Modifier.height(16.dp))
-
+        
         // 2. Lista Risultati
         LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(1.dp)
+        modifier = Modifier
+        .fillMaxSize()
+        .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(1.dp)
         ) {
             items(searchResults) { note ->
                 SearchNoteItem(note = note, onClick = { selectedNote = note })
             }
         }
     }
-
+    
     // Dialog di dettaglio (uguale a quello della HomeScreen)
     selectedNote?.let { note ->
         NoteDetailDialog(
-            note = note,
-            onDismiss = { selectedNote = null },
-            onDownload = {
-                selectedNote = null
-                onOpenNote(note.id)
-            }
+        note = note,
+        onDismiss = { selectedNote = null },
+        onDownload = {
+            selectedNote = null
+            onOpenNote(note.id)
+        }
         )
     }
 }
@@ -103,60 +103,60 @@ fun SearchScreen(
 fun SearchNoteItem(note: Note, onClick: () -> Unit) {
     val almaRed = Color(0xFFBB2E29)
     val textGray = Color.Gray
-
+    
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable { onClick() },
-        shape = RoundedCornerShape(0.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White)
+    modifier = Modifier
+    .fillMaxWidth()
+    .clickable { onClick() },
+    shape = RoundedCornerShape(0.dp),
+    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Row(verticalAlignment = Alignment.Top) {
                 // PDF Icon
                 Icon(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = null,
-                    tint = almaRed,
-                    modifier = Modifier.size(32.dp)
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = null,
+                tint = almaRed,
+                modifier = Modifier.size(32.dp)
                 )
                 
                 Spacer(Modifier.width(16.dp))
-
+                
                 Column(modifier = Modifier.weight(1f)) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = note.title,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            color = Color.Black
+                        text = note.title,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colorScheme.onSurface
                         )
                         Row(verticalAlignment = Alignment.CenterVertically) {
                             Icon(Icons.Default.Star, null, tint = almaRed, modifier = Modifier.size(14.dp))
                             Text(" ${note.rating}/5", fontSize = 12.sp, fontWeight = FontWeight.Medium)
                         }
                     }
-
+                    
                     Text(
-                        text = "Prof. ${note.professorName} - ${note.courseName}",
-                        fontSize = 13.sp,
-                        color = Color.DarkGray,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
+                    text = "Prof. ${note.professorName} - ${note.courseName}",
+                    fontSize = 13.sp,
+                    color = Color.DarkGray,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                     )
                 }
             }
-
+            
             Spacer(Modifier.height(8.dp))
-
+            
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(Icons.Default.Download, null, tint = textGray, modifier = Modifier.size(14.dp))
@@ -167,8 +167,8 @@ fun SearchNoteItem(note: Note, onClick: () -> Unit) {
                     Icon(Icons.Default.Person, null, tint = textGray, modifier = Modifier.size(14.dp))
                     Text(" Caricato da ${note.uploaderName}", fontSize = 11.sp, color = textGray)
                 }
-
-                Text("20 pagine", fontSize = 11.sp, color = Color.Black)
+                
+                Text("20 pagine", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurface)
             }
         }
     }
@@ -176,16 +176,16 @@ fun SearchNoteItem(note: Note, onClick: () -> Unit) {
 
 @Composable
 fun BasicTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    decorationBox: @Composable (innerTextField: @Composable () -> Unit) -> Unit
+                   value: String,
+                   onValueChange: (String) -> Unit,
+                   modifier: Modifier = Modifier,
+                   decorationBox: @Composable (innerTextField: @Composable () -> Unit) -> Unit
 ) {
     androidx.compose.foundation.text.BasicTextField(
-        value = value,
-        onValueChange = onValueChange,
-        modifier = modifier,
-        textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
-        decorationBox = decorationBox
+    value = value,
+    onValueChange = onValueChange,
+    modifier = modifier,
+    textStyle = androidx.compose.ui.text.TextStyle(fontSize = 16.sp),
+    decorationBox = decorationBox
     )
 }

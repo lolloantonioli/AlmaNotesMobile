@@ -25,6 +25,7 @@ import androidx.compose.material.icons.filled.Upload
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -41,7 +42,9 @@ import org.koin.androidx.compose.koinViewModel
 data class BadgeUi(val title: String, val subtitle: String, val icon: ImageVector, val achieved: Boolean)
 
 @Composable
-fun BadgesScreen(viewModel: BadgesViewModel = koinViewModel()) {
+fun BadgesScreen(
+    viewModel: BadgesViewModel = koinViewModel()
+) {
     val almaRed = Color(0xFFBB2E29)
     val progress by viewModel.progress.collectAsStateWithLifecycle()
 
@@ -58,7 +61,7 @@ fun BadgesScreen(viewModel: BadgesViewModel = koinViewModel()) {
         BadgeUi("Recensore Lv.3", "Metti 10 recensioni", Icons.Default.Star, progress.reviewCount >= 10)
     )
 
-    Column(modifier = Modifier.fillMaxSize().background(Color(0xFFF5F5F5)).padding(16.dp)) {
+    Column(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background).padding(16.dp)) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.EmojiEvents, contentDescription = null, tint = almaRed)
             Spacer(Modifier.size(8.dp))
@@ -82,7 +85,7 @@ private fun BadgeCard(badge: BadgeUi) {
     Card(
         modifier = Modifier.fillMaxWidth().border(1.dp, primary, RoundedCornerShape(10.dp)),
         shape = RoundedCornerShape(10.dp),
-        colors = CardDefaults.cardColors(containerColor = Color.White),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(4.dp)
     ) {
         Row(modifier = Modifier.padding(18.dp), verticalAlignment = Alignment.CenterVertically) {

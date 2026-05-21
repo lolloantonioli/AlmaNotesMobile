@@ -23,6 +23,7 @@ import java.io.File
 import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
+import androidx.annotation.RequiresApi
 
 
 sealed class PdfViewerState {
@@ -98,6 +99,7 @@ class PdfViewerViewModel(
         }
     }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     suspend fun saveCurrentPdfToDownloads(noteId: Long, context: Context): Boolean = withContext(Dispatchers.IO) {
         try {
             val note = repository.getNoteById(noteId) ?: return@withContext false

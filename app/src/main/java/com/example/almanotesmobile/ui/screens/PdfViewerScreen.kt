@@ -91,7 +91,7 @@ fun PdfViewerScreen(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color(0xFF2B2B2B))
+                .background(MaterialTheme.colorScheme.background)
         ) {
             when (val s = state) {
                 is PdfViewerState.Loading      -> PdfLoading("Caricamento…", null)
@@ -105,6 +105,9 @@ fun PdfViewerScreen(
         }
     }
 }
+
+// ─── Pagine ───────────────────────────────────────────────────────────────────
+
 @Composable
 private fun PdfPages(pages: List<Bitmap>) {
     LazyColumn(
@@ -138,7 +141,7 @@ private fun PdfLoading(message: String, progress: Float?) {
             CircularProgressIndicator(
                 progress = { progress },
                 color = Color(0xFFBB2E29),
-                trackColor = Color.White.copy(alpha = 0.25f),
+                trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.25f),
                 modifier = Modifier.size(56.dp)
             )
         } else {
@@ -148,7 +151,7 @@ private fun PdfLoading(message: String, progress: Float?) {
             )
         }
         Spacer(Modifier.height(16.dp))
-        Text(text = message, color = Color.White, fontSize = 14.sp)
+        Text(text = message, color = MaterialTheme.colorScheme.onSurface, fontSize = 14.sp)
     }
 }
 
@@ -170,7 +173,7 @@ private fun PdfError(message: String, onRetry: () -> Unit) {
         Spacer(Modifier.height(16.dp))
         Text(
             text = message,
-            color = Color.White,
+            color = MaterialTheme.colorScheme.onSurface,
             fontSize = 14.sp,
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 40.dp)
@@ -180,7 +183,7 @@ private fun PdfError(message: String, onRetry: () -> Unit) {
             onClick = onRetry,
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFFBB2E29))
         ) {
-            Text("Riprova", color = Color.White)
+            Text("Riprova", color = MaterialTheme.colorScheme.onPrimary)
         }
     }
 }

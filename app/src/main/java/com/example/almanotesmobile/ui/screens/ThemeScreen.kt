@@ -50,10 +50,10 @@ fun ThemeScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 48.dp, bottom = 48.dp),
-                horizontalArrangement = Arrangement.Center,
+                    .padding(top = 24.dp, bottom = 48.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
+                Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.AccountCircle,
                     contentDescription = null,
@@ -70,6 +70,8 @@ fun ThemeScreen(
                     fontWeight = FontWeight.Bold
                     // fontFamily = merriweatherSans // Se hai configurato il font
                 )
+
+                Spacer(modifier = Modifier.weight(1f))
             }
 
             // Gruppo di Radio Button STANDARD

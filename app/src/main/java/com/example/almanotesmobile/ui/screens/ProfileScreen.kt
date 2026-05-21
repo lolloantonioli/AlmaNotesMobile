@@ -162,7 +162,7 @@ fun ProfileScreen(
 
     // ── Layout ──────────────────────────────────────────────────────────────
     LazyColumn(
-        modifier = Modifier.fillMaxSize().background(Color(0xFFF8F8F8)),
+        modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 32.dp)
     ) {
 
@@ -183,14 +183,14 @@ fun ProfileScreen(
             Card(
                 modifier  = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
                 shape     = RoundedCornerShape(16.dp),
-                colors    = CardDefaults.cardColors(Color.White),
+                colors    = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {
                     Box(
                         modifier = Modifier
                             .size(90.dp).clip(CircleShape)
-                            .background(Color(0xFFF5F5F5))
+                            .background(MaterialTheme.colorScheme.background)
                             .border(1.dp, Color.LightGray.copy(alpha = 0.5f), CircleShape)
                             .clickable { showImageSourceDialog = true },
                         contentAlignment = Alignment.Center
@@ -202,7 +202,7 @@ fun ProfileScreen(
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Icon(Icons.Default.AddAPhoto, null, tint = Color.Gray, modifier = Modifier.size(30.dp))
                                 Text("Aggiungi\nimmagine", fontSize = 9.sp, lineHeight = 11.sp,
-                                    textAlign = TextAlign.Center, color = Color.Gray)
+                                    textAlign = TextAlign.Center, color = MaterialTheme.colorScheme.onSurfaceVariant)
                             }
                         }
                     }
@@ -382,7 +382,7 @@ private fun ProfileNoteCard(
     row:      @Composable (Note) -> Unit
 ) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(2.dp)) {
         Column {
             notes.forEachIndexed { i, note ->
                 row(note)
@@ -397,9 +397,9 @@ private fun ProfileNoteCard(
 @Composable
 private fun ProfileEmptyState(message: String, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(2.dp)) {
         Box(Modifier.padding(24.dp).fillMaxWidth(), contentAlignment = Alignment.Center) {
-            Text(message, color = Color.Gray, fontSize = 13.sp, textAlign = TextAlign.Center)
+            Text(message, color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 13.sp, textAlign = TextAlign.Center)
         }
     }
 }
@@ -415,7 +415,7 @@ private fun UploadedProfileRow(note: Note, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(note.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = Color.Gray,
+            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
         }
         Text(note.uploadedAt.toRelativeTimeString(),
@@ -432,13 +432,13 @@ private fun DownloadedProfileRow(note: Note, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(note.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = Color.Gray,
+            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Person, null, modifier = Modifier.size(10.dp), tint = Color.Gray)
                 Spacer(Modifier.width(3.dp))
-                Text("Caricato da ${note.uploaderName}", fontSize = 10.sp, color = Color.Gray)
+                Text("Caricato da ${note.uploaderName}", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Text(note.uploadedAt.toRelativeTimeString(),
@@ -455,13 +455,13 @@ private fun PopularProfileRow(note: Note, onClick: () -> Unit) {
         Column(Modifier.weight(1f)) {
             Text(note.title, fontWeight = FontWeight.SemiBold, fontSize = 14.sp,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
-            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = Color.Gray,
+            Text("${note.professorName} - ${note.subject}", fontSize = 11.sp, color = MaterialTheme.colorScheme.onSurfaceVariant,
                 maxLines = 1, overflow = TextOverflow.Ellipsis)
             Spacer(Modifier.height(3.dp))
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Download, null, modifier = Modifier.size(10.dp), tint = Color.Gray)
                 Spacer(Modifier.width(3.dp))
-                Text("${note.downloadCount.toFormattedCount()} download", fontSize = 10.sp, color = Color.Gray)
+                Text("${note.downloadCount.toFormattedCount()} download", fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -479,7 +479,7 @@ private fun PopularProfileRow(note: Note, onClick: () -> Unit) {
 @Composable
 private fun AchievementCard(points: Long, modifier: Modifier = Modifier) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(Color.White), elevation = CardDefaults.cardElevation(2.dp)) {
+        colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(2.dp)) {
         Row(modifier = Modifier.padding(horizontal = 20.dp, vertical = 16.dp),
             verticalAlignment = Alignment.CenterVertically) {
             Icon(Icons.Default.EmojiEvents, null,
@@ -499,8 +499,8 @@ fun CredentialRow(icon: ImageVector, label: String, value: String, isPassword: B
         Icon(icon, null, tint = Color.DarkGray, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(label, fontSize = 10.sp, color = Color.Gray, fontWeight = FontWeight.Bold)
-            Text(value, fontSize = 14.sp, color = Color.Black, fontWeight = FontWeight.Medium)
+            Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
+            Text(value, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
         }
         if (isPassword) Icon(Icons.Outlined.Visibility, null,
             tint = Color.LightGray, modifier = Modifier.size(18.dp))
