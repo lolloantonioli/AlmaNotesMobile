@@ -28,6 +28,7 @@ fun RegistrationScreen(
     var username by remember { mutableStateOf("") }
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
     
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
@@ -138,10 +139,12 @@ fun RegistrationScreen(
 
                 // Bottone Registrati
                 Button(
-                    onClick = { 
+                    onClick = {
                         if (username.isNotBlank() && email.isNotBlank() && password.isNotBlank()) {
                             viewModel.register(username, email, password)
                             onRegisterSuccess()
+                        } else {
+                            errorMessage = "Compila tutti i campi per continuare"
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = almaRed),
@@ -151,6 +154,39 @@ fun RegistrationScreen(
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text("Registrati", color = Color.White, fontSize = 16.sp)
+                }
+
+                if (errorMessage != null) {
+                    Spacer(modifier = Modifier.height(10.dp))
+                    Text(errorMessage!!, color = Color.Red, fontSize = 12.sp)
+                }
+
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Oppure registrati con", color = Color.DarkGray, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        viewModel.registerWithProvider("google") { success ->
+                            if (success) onRegisterSuccess()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(45.dp)
+                ) {
+                    Text("Continua con Google")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        viewModel.registerWithProvider("apple") { success ->
+                            if (success) onRegisterSuccess()
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(45.dp)
+                ) {
+                    Text("Continua con Apple")
                 }
             }
         }

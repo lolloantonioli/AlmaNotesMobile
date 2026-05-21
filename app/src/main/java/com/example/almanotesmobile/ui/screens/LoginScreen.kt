@@ -179,6 +179,36 @@ fun LoginScreen(
                     Text("Accedi", color = Color.White)
                 }
 
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("Oppure accedi con", color = Color.DarkGray, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        viewModel.loginWithProvider("google") { success ->
+                            if (success) onLoginSuccess()
+                            else errorMessage = "Nessun account Google associato. Registrati prima con Google."
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(45.dp)
+                ) {
+                    Text("Continua con Google")
+                }
+
+                Spacer(modifier = Modifier.height(8.dp))
+
+                OutlinedButton(
+                    onClick = {
+                        viewModel.loginWithProvider("apple") { success ->
+                            if (success) onLoginSuccess()
+                            else errorMessage = "Nessun account Apple associato. Registrati prima con Apple."
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth().height(45.dp)
+                ) {
+                    Text("Continua con Apple")
+                }
+
                 if (biometricAvailable && biometricEnabled) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(

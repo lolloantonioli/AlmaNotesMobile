@@ -32,6 +32,13 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch { repository.saveRegistration(username, email, password) }
     }
 
+    fun registerWithProvider(provider: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            repository.registerWithProvider(provider)
+            onResult(true)
+        }
+    }
+
     fun updateProfileImage(uri: String) {
         viewModelScope.launch { repository.updateProfileImage(uri) }
     }
@@ -40,6 +47,13 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         viewModelScope.launch {
             val success = repository.login(email, password)
             if (success) repository.setBiometricEnabled(true) // abilita biometria al primo login
+            onResult(success)
+        }
+    }
+
+    fun loginWithProvider(provider: String, onResult: (Boolean) -> Unit) {
+        viewModelScope.launch {
+            val success = repository.loginWithProvider(provider)
             onResult(success)
         }
     }

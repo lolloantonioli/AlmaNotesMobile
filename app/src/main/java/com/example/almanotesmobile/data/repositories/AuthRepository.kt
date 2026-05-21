@@ -44,6 +44,18 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         }
     }
 
+    suspend fun registerWithProvider(provider: String) {
+        val normalizedProvider = provider.lowercase()
+        val providerName = normalizedProvider.replaceFirstChar { it.uppercase() }
+        dataStore.edit { prefs ->
+            prefs[Keys.USERNAME] = "Utente $providerName"
+            prefs[Keys.EMAIL] = "utente.$normalizedProvider@provider.almanotes"
+            prefs[Keys.PASSWORD] = ""
+            prefs[Keys.IS_REGISTERED] = true
+            prefs[Keys.IS_LOGGED_IN] = true
+        }
+    }
+
     suspend fun updateProfileImage(uri: String) {
         dataStore.edit { it[Keys.PROFILE_IMAGE_URI] = uri }
     }
@@ -61,6 +73,22 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
             }
         }
         return success
+    }
+
+    suspend fun loginWithProvider(provider: String): Boolean {
+        var canLogin = false
+        dataStore.edit { prefs ->
+            val storedEmail = prefs[Keys.EMAIL].orEmpty()
+            val providerDomain = "@provider.almanotes"
+            canLogin = (prefs[Keys.IS_REGISTERED] ?: false) &&
+                    storedEmail.endsWith(providerDomain) &&
+                    storedEmail.contains(provider.lowercase())
+
+            if (canLogin) {
+                prefs[Keys.IS_LOGGED_IN] = true
+            }
+        }
+        return canLogin
     }
 
     suspend fun setBiometricEnabled(enabled: Boolean) {
