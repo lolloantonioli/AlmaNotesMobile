@@ -71,21 +71,24 @@ fun LoginScreen(
     val googleLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val account = GoogleSignInHelper.parseResult(result.data)
-            if (account != null) {
-                viewModel.loginWithGoogle(
-                    googleId    = account.id.orEmpty(),
-                    displayName = account.displayName.orEmpty(),
-                    email       = account.email.orEmpty(),
-                    photoUrl    = account.photoUrl?.toString()
-                ) { success ->
-                    if (success) onLoginSuccess()
-                    else errorMessage = "Accesso con Google non riuscito"
-                }
-            } else {
-                errorMessage = "Accesso con Google annullato"
+        if (result.resultCode != Activity.RESULT_OK) {
+            errorMessage = "Accesso con Google annullato o non completato"
+            return@rememberLauncherForActivityResult
+        }
+
+        val account = GoogleSignInHelper.parseResult(result.data)
+        if (account != null) {
+            viewModel.loginWithGoogle(
+                googleId    = account.id.orEmpty(),
+                displayName = account.displayName.orEmpty(),
+                email       = account.email.orEmpty(),
+                photoUrl    = account.photoUrl?.toString()
+            ) { success ->
+                if (success) onLoginSuccess()
+                else errorMessage = "Accesso con Google non riuscito"
             }
+        } else {
+            errorMessage = "Accesso Google fallito. Verifica configurazione Firebase/SHA-1 e riprova."
         }
     }
 

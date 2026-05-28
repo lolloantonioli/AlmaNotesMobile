@@ -42,22 +42,25 @@ fun RegistrationScreen(
     val googleLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            val account = GoogleSignInHelper.parseResult(result.data)
-            if (account != null) {
-                // loginWithGoogle funziona anche come registrazione
-                viewModel.loginWithGoogle(
-                    googleId    = account.id.orEmpty(),
-                    displayName = account.displayName.orEmpty(),
-                    email       = account.email.orEmpty(),
-                    photoUrl    = account.photoUrl?.toString()
-                ) { success ->
-                    if (success) onRegisterSuccess()
-                    else errorMessage = "Registrazione con Google non riuscita"
-                }
-            } else {
-                errorMessage = "Registrazione con Google annullata"
+        if (result.resultCode != Activity.RESULT_OK) {
+            errorMessage = "Registrazione con Google annullata o non completata"
+            return@rememberLauncherForActivityResult
+        }
+
+        val account = GoogleSignInHelper.parseResult(result.data)
+        if (account != null) {
+            // loginWithGoogle funziona anche come registrazione
+            viewModel.loginWithGoogle(
+                googleId    = account.id.orEmpty(),
+                displayName = account.displayName.orEmpty(),
+                email       = account.email.orEmpty(),
+                photoUrl    = account.photoUrl?.toString()
+            ) { success ->
+                if (success) onRegisterSuccess()
+                else errorMessage = "Registrazione con Google non riuscita"
             }
+        } else {
+            errorMessage = "Registrazione Google fallita. Verifica configurazione Firebase/SHA-1 e riprova."
         }
     }
 
