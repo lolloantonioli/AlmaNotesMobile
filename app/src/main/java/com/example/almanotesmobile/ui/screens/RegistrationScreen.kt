@@ -18,6 +18,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.ui.platform.LocalContext
+import com.example.almanotesmobile.utils.GoogleSignInHelper
 
 @Composable
 fun RegistrationScreen(
@@ -29,9 +34,32 @@ fun RegistrationScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val context = LocalContext.current
     
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
+
+    val googleLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val account = GoogleSignInHelper.parseResult(result.data)
+            if (account != null) {
+                // loginWithGoogle funziona anche come registrazione
+                viewModel.loginWithGoogle(
+                    googleId    = account.id.orEmpty(),
+                    displayName = account.displayName.orEmpty(),
+                    email       = account.email.orEmpty(),
+                    photoUrl    = account.photoUrl?.toString()
+                ) { success ->
+                    if (success) onRegisterSuccess()
+                    else errorMessage = "Registrazione con Google non riuscita"
+                }
+            } else {
+                errorMessage = "Registrazione con Google annullata"
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. Immagine di Sfondo
@@ -165,12 +193,12 @@ fun RegistrationScreen(
                 Text("Oppure registrati con", color = Color.DarkGray, fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                Spacer(modifier = Modifier.height(12.dp))
+                Text("Oppure registrati con", color = Color.DarkGray, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedButton(
-                    onClick = {
-                        viewModel.registerWithProvider("google") { success ->
-                            if (success) onRegisterSuccess()
-                        }
-                    },
+                    onClick = { googleLauncher.launch(GoogleSignInHelper.signInIntent(context)) },
                     modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
                     Text("Continua con Google")
@@ -179,14 +207,11 @@ fun RegistrationScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = {
-                        viewModel.registerWithProvider("apple") { success ->
-                            if (success) onRegisterSuccess()
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(45.dp)
+                    onClick = { errorMessage = "Accesso con Apple non ancora disponibile" },
+                    modifier = Modifier.fillMaxWidth().height(45.dp),
+                    enabled = false
                 ) {
-                    Text("Continua con Apple")
+                    Text("Continua con Apple", color = Color.Gray)
                 }
             }
         }

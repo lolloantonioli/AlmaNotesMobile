@@ -10,6 +10,10 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.example.almanotesmobile.utils.GoogleSignInHelper
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
@@ -62,6 +66,27 @@ fun LoginScreen(
         val bm = BiometricManager.from(context)
         bm.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
                 BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    val googleLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val account = GoogleSignInHelper.parseResult(result.data)
+            if (account != null) {
+                viewModel.loginWithGoogle(
+                    googleId    = account.id.orEmpty(),
+                    displayName = account.displayName.orEmpty(),
+                    email       = account.email.orEmpty(),
+                    photoUrl    = account.photoUrl?.toString()
+                ) { success ->
+                    if (success) onLoginSuccess()
+                    else errorMessage = "Accesso con Google non riuscito"
+                }
+            } else {
+                errorMessage = "Accesso con Google annullato"
+            }
+        }
     }
 
     fun launchBiometric() {
@@ -183,13 +208,12 @@ fun LoginScreen(
                 Text("Oppure accedi con", color = Color.DarkGray, fontSize = 12.sp)
                 Spacer(modifier = Modifier.height(8.dp))
 
+                Spacer(modifier = Modifier.height(10.dp))
+                Text("Oppure accedi con", color = Color.Gray, fontSize = 12.sp)
+                Spacer(modifier = Modifier.height(8.dp))
+
                 OutlinedButton(
-                    onClick = {
-                        viewModel.loginWithProvider("google") { success ->
-                            if (success) onLoginSuccess()
-                            else errorMessage = "Nessun account Google associato. Registrati prima con Google."
-                        }
-                    },
+                    onClick = { googleLauncher.launch(GoogleSignInHelper.signInIntent(context)) },
                     modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
                     Text("Continua con Google")
@@ -198,15 +222,11 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = {
-                        viewModel.loginWithProvider("apple") { success ->
-                            if (success) onLoginSuccess()
-                            else errorMessage = "Nessun account Apple associato. Registrati prima con Apple."
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(45.dp)
+                    onClick = { errorMessage = "Accesso con Apple non ancora disponibile" },
+                    modifier = Modifier.fillMaxWidth().height(45.dp),
+                    enabled = false
                 ) {
-                    Text("Continua con Apple")
+                    Text("Continua con Apple", color = Color.Gray)
                 }
 
                 if (biometricAvailable && biometricEnabled) {

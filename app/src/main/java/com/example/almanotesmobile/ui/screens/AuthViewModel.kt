@@ -58,6 +58,20 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
         }
     }
 
+    fun loginWithGoogle(
+        googleId: String,
+        displayName: String,
+        email: String,
+        photoUrl: String?,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            val success = repository.loginWithGoogle(googleId, displayName, email, photoUrl)
+            if (success) repository.setBiometricEnabled(true)
+            onResult(success)
+        }
+    }
+
     fun loginWithBiometric(onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val success = repository.loginWithBiometric()
