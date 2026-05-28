@@ -18,12 +18,15 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
-import android.app.Activity
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.IntentSenderRequest
-import androidx.activity.result.contract.ActivityResultContracts
+import android.util.Log
+import android.widget.Toast
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import kotlinx.coroutines.launch
 import androidx.compose.ui.platform.LocalContext
-import com.example.almanotesmobile.utils.GoogleSignInHelper
 
 @Composable
 fun RegistrationScreen(
@@ -36,34 +39,13 @@ fun RegistrationScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+    val credentialManager = remember { CredentialManager.create(context) }
 
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
 
-    val googleLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartIntentSenderForResult()
-    ) { result ->
-        if (result.resultCode != Activity.RESULT_OK) {
-            errorMessage = "Registrazione con Google annullata"
-            return@rememberLauncherForActivityResult
-        }
 
-        val account = GoogleSignInHelper.parseResult(context, result.data)
-        if (account != null) {
-            // loginWithGoogle funziona anche come registrazione
-            viewModel.loginWithGoogle(
-                googleId    = account.id.orEmpty(),
-                displayName = account.displayName.orEmpty(),
-                email       = account.email.orEmpty(),
-                photoUrl    = account.photoUrl?.toString()
-            ) { success ->
-                if (success) onRegisterSuccess()
-                else errorMessage = "Registrazione con Google non riuscita"
-            }
-        } else {
-            errorMessage = "Registrazione Google fallita. Verifica configurazione Firebase/SHA-1 e riprova."
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. Immagine di Sfondo
@@ -202,13 +184,41 @@ fun RegistrationScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = { GoogleSignInHelper.beginSignIn(context)
-                        .addOnSuccessListener { r ->
-                            googleLauncher.launch(IntentSenderRequest.Builder(r.pendingIntent.intentSender).build())
+                    onClick = {
+                        coroutineScope.launch {
+                            try {
+                                val googleIdOption = GetGoogleIdOption.Builder()
+                                    .setFilterByAuthorizedAccounts(false)
+                                    .setServerClientId(context.getString(R.string.web_client_id))
+                                    .setAutoSelectEnabled(true)
+                                    .build()
+
+                                val request = GetCredentialRequest.Builder()
+                                    .addCredentialOption(googleIdOption)
+                                    .build()
+
+                                val result = credentialManager.getCredential(request = request, context = context)
+                                val credential = result.credential
+
+                                if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                                    viewModel.loginWithGoogle(
+                                        googleId = googleIdTokenCredential.id,
+                                        displayName = googleIdTokenCredential.displayName.orEmpty(),
+                                        email = googleIdTokenCredential.id,
+                                        photoUrl = null
+                                    ) { success ->
+                                        if (success) onRegisterSuccess() else errorMessage = "Registrazione con Google non riuscita"
+                                    }
+                                } else {
+                                    errorMessage = "Credenziale Google non valida"
+                                }
+                            } catch (e: Exception) {
+                                Log.e("RegistrationScreen", "errore durante la registrazione con Google", e)
+                                Toast.makeText(context, "Registrazione con Google annullata", Toast.LENGTH_SHORT).show()
+                            }
                         }
-                        .addOnFailureListener {
-                            errorMessage = "Avvio accesso Google non riuscito"
-                        } },
+                    },
                     modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
                     Text("Continua con Google")
