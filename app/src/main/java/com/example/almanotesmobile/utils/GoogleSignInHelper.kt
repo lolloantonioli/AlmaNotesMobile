@@ -2,39 +2,67 @@ package com.example.almanotesmobile.utils
 
 import android.content.Context
 import android.content.Intent
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.auth.api.identity.BeginSignInRequest
+import com.google.android.gms.auth.api.identity.Identity
+import com.google.android.gms.auth.api.identity.SignInClient
+import com.google.android.gms.auth.api.identity.SignInCredential
 import com.google.android.gms.common.api.ApiException
+import com.google.android.gms.tasks.Task
+import com.google.android.gms.tasks.Tasks
 
 object GoogleSignInHelper {
 
-    private fun client(context: Context) = GoogleSignIn.getClient(
-        context,
-        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestEmail()
-            .requestProfile()
-            .build()
+    data class GoogleUser(
+        val id: String,
+        val displayName: String,
+        val email: String,
+        val photoUrl: String?
     )
 
-    /** Intent da passare al launcher */
-    fun signInIntent(context: Context): Intent = client(context).signInIntent
+    private fun oneTapClient(context: Context): SignInClient = Identity.getSignInClient(context)
 
-    /**
-     * Parsa il risultato dell'ActivityResult.
-     * Restituisce l'account Google oppure null se l'utente ha annullato o c'è stato un errore.
-     */
-    fun parseResult(data: Intent?): GoogleSignInAccount? = try {
-        GoogleSignIn.getSignedInAccountFromIntent(data).getResult(ApiException::class.java)
+    private fun signInRequest(context: Context): BeginSignInRequest {
+        val serverClientIdRes = context.resources.getIdentifier(
+            "default_web_client_id",
+            "string",
+            context.packageName
+        )
+        require(serverClientIdRes != 0) { "default_web_client_id non configurato" }
+        val serverClientId = context.getString(serverClientIdRes)
+
+        return BeginSignInRequest.builder()
+            .setGoogleIdTokenRequestOptions(
+                BeginSignInRequest.GoogleIdTokenRequestOptions.builder()
+                    .setSupported(true)
+                    .setServerClientId(serverClientId)
+                    .setFilterByAuthorizedAccounts(false)
+                    .build()
+            )
+            .setAutoSelectEnabled(false)
+            .build()
+    }
+
+    fun beginSignIn(context: Context): Task<com.google.android.gms.auth.api.identity.BeginSignInResult> {
+        return try {
+            oneTapClient(context).beginSignIn(signInRequest(context))
+        } catch (e: IllegalArgumentException) {
+            Tasks.forException(e)
+        }
+    }
+
+    fun parseResult(context: Context, data: Intent?): GoogleUser? = try {
+        val credential: SignInCredential = oneTapClient(context).getSignInCredentialFromIntent(data)
+        GoogleUser(
+            id = credential.id,
+            displayName = credential.displayName.orEmpty(),
+            email = credential.id,
+            photoUrl = credential.profilePictureUri?.toString()
+        )
     } catch (_: ApiException) {
         null
     }
 
-    /**
-     * Sign-out da Google: necessario perché alla prossima apertura
-     * venga mostrato di nuovo il selettore account.
-     */
     fun signOut(context: Context) {
-        client(context).signOut()
+        oneTapClient(context).signOut()
     }
 }

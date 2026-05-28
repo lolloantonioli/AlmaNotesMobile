@@ -20,6 +20,7 @@ import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.example.almanotesmobile.utils.GoogleSignInHelper
@@ -35,19 +36,19 @@ fun RegistrationScreen(
     var password by remember { mutableStateOf("") }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     val context = LocalContext.current
-    
+
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
 
     val googleLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
-            errorMessage = "Registrazione con Google annullata o non completata"
+            errorMessage = "Registrazione con Google annullata"
             return@rememberLauncherForActivityResult
         }
 
-        val account = GoogleSignInHelper.parseResult(result.data)
+        val account = GoogleSignInHelper.parseResult(context, result.data)
         if (account != null) {
             // loginWithGoogle funziona anche come registrazione
             viewModel.loginWithGoogle(
@@ -201,7 +202,13 @@ fun RegistrationScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = { googleLauncher.launch(GoogleSignInHelper.signInIntent(context)) },
+                    onClick = { GoogleSignInHelper.beginSignIn(context)
+                        .addOnSuccessListener { r ->
+                            googleLauncher.launch(IntentSenderRequest.Builder(r.pendingIntent.intentSender).build())
+                        }
+                        .addOnFailureListener {
+                            errorMessage = "Avvio accesso Google non riuscito"
+                        } },
                     modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
                     Text("Continua con Google")

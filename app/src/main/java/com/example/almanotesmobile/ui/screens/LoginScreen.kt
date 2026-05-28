@@ -12,6 +12,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import android.app.Activity
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import com.example.almanotesmobile.utils.GoogleSignInHelper
 import androidx.compose.material3.*
@@ -69,14 +70,14 @@ fun LoginScreen(
     }
 
     val googleLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
+        ActivityResultContracts.StartIntentSenderForResult()
     ) { result ->
         if (result.resultCode != Activity.RESULT_OK) {
-            errorMessage = "Accesso con Google annullato o non completato"
+            errorMessage = "Accesso con Google annullato"
             return@rememberLauncherForActivityResult
         }
 
-        val account = GoogleSignInHelper.parseResult(result.data)
+        val account = GoogleSignInHelper.parseResult(context, result.data)
         if (account != null) {
             viewModel.loginWithGoogle(
                 googleId    = account.id.orEmpty(),
@@ -216,7 +217,13 @@ fun LoginScreen(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 OutlinedButton(
-                    onClick = { googleLauncher.launch(GoogleSignInHelper.signInIntent(context)) },
+                    onClick = { GoogleSignInHelper.beginSignIn(context)
+                        .addOnSuccessListener { r ->
+                            googleLauncher.launch(IntentSenderRequest.Builder(r.pendingIntent.intentSender).build())
+                        }
+                        .addOnFailureListener {
+                            errorMessage = "Avvio accesso Google non riuscito"
+                        } },
                     modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
                     Text("Continua con Google")
