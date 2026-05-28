@@ -6,13 +6,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
 import com.example.almanotesmobile.data.repositories.NoteRepository
+import com.example.almanotesmobile.data.repositories.NotificationRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 
-class UploadViewModel(private val repository: NoteRepository) : ViewModel() {
+class UploadViewModel(
+    private val repository: NoteRepository,
+    private val notificationRepository: NotificationRepository
+) : ViewModel() {
 
     fun uploadNote(
         context: Context,
@@ -37,6 +41,10 @@ class UploadViewModel(private val repository: NoteRepository) : ViewModel() {
                     uploadedAt = System.currentTimeMillis()
                 )
                 repository.insert(newNote)
+                notificationRepository.publish(
+                    title = "Upload completato",
+                    message = "Hai caricato \"$title\" con successo."
+                )
                 onSuccess()
             }
         }

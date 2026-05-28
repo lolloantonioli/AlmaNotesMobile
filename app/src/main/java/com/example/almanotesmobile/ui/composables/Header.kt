@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.*
 import com.example.almanotesmobile.R
 import androidx.compose.runtime.*
@@ -67,6 +68,18 @@ fun AppBar(navController: NavController, showBack: Boolean, onBack: () -> Unit) 
                 Icon(
                     painter = painterResource(R.drawable.theme),
                     contentDescription = "Theme",
+                    tint = backgroundColor
+                )
+            }
+            IconButton(onClick = {
+                navController.navigate(Route.Notifications) {
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Notifications,
+                    contentDescription = "Notifiche",
                     tint = backgroundColor
                 )
             }

@@ -6,6 +6,7 @@ import androidx.room.Room
 import com.example.almanotesmobile.data.local.NoteDatabase
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
+import com.example.almanotesmobile.data.repositories.NotificationRepository
 import com.example.almanotesmobile.data.repositories.ThemeRepository
 import com.example.almanotesmobile.ui.screens.*
 import org.koin.core.module.dsl.viewModel
@@ -37,15 +38,17 @@ val appModule = module {
     }
     single { get<NoteDatabase>().noteDao() }
     single { NoteRepository(get()) }
+    single { NotificationRepository() }
 
     // ViewModels
     viewModel { HomeViewModel(get()) }
-    viewModel { PdfViewerViewModel(get(), get()) }
-    viewModel { UploadViewModel(get()) }
+    viewModel { PdfViewerViewModel(get(), get(), get()) }
+    viewModel { UploadViewModel(get(), get()) }
     viewModel { SearchViewModel(get()) }
-    viewModel { ReviewsViewModel(get(), get()) }
+    viewModel { ReviewsViewModel(get(), get(), get()) }viewModel { ReviewsViewModel(get(), get()) }
     viewModel { DownloadedFilesViewModel(get()) }
     viewModel { UploadedFilesViewModel(get(), get()) }
     viewModel { BadgesViewModel(get(), get()) }
     viewModel { ProfileViewModel(get(), get()) }
+    viewModel { NotificationsViewModel(get()) }
 }

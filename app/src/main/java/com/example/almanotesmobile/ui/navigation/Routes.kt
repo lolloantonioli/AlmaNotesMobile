@@ -46,5 +46,8 @@ sealed interface Route {
     data object Profile : Route
 
     @Serializable
+    data object Notifications : Route
+
+    @Serializable
     data class PdfViewer(val noteId: Long) : Route
 }

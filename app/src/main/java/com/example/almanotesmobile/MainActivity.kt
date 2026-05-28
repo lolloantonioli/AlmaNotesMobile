@@ -45,7 +45,8 @@ class MainActivity : FragmentActivity() {
             val showHeaderBack = currentRoute.contains("DownloadedFiles") ||
                     currentRoute.contains("UploadedFiles") ||
                     currentRoute.contains("Badges") ||
-                    currentRoute.contains("Theme")
+                    currentRoute.contains("Theme") ||
+                    currentRoute.contains("Notifications")
 
             AlmaNotesMobileTheme(
                 darkTheme = when (themeState.theme) {
@@ -179,6 +180,10 @@ class MainActivity : FragmentActivity() {
                                 onShowDownloadedNotes = { navController.navigate(Route.DownloadedFiles) } ,
                                 onShowBadges = { navController.navigate(Route.Badges) }
                             )
+                        }
+
+                        composable<Route.Notifications> {
+                            NotificationsScreen()
                         }
 
                         composable<Route.PdfViewer> { backStackEntry ->

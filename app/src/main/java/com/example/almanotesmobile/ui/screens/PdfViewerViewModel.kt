@@ -10,6 +10,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
+import com.example.almanotesmobile.data.repositories.NotificationRepository
 import com.example.almanotesmobile.utils.downloadPdfToInternalStorage
 import com.example.almanotesmobile.utils.getPdfFile
 import com.example.almanotesmobile.utils.markNoteAsDownloaded
@@ -36,7 +37,8 @@ sealed class PdfViewerState {
 
 class PdfViewerViewModel(
     private val repository: NoteRepository,
-    private val authRepository: AuthRepository
+    private val authRepository: AuthRepository,
+    private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
     private val _state = MutableStateFlow<PdfViewerState>(PdfViewerState.Loading)
@@ -94,6 +96,15 @@ class PdfViewerViewModel(
                 repository.incrementDownload(noteId)
                 markNoteAsDownloaded(context, noteId)
                 authRepository.markNoteAsDownloaded(noteId)
+                notificationRepository.publish(
+                    title = "Download registrato",
+                    message = "Hai scaricato/aperto \"${note.title}\"."
+                )
+                notificationRepository.publish(
+                    title = "Push candidata: nuovo download",
+                    message = "Qualcuno ha scaricato il file \"${note.title}\" che hai caricato.",
+                    isPushCandidate = true
+                )
                 _state.value = PdfViewerState.Ready(pages, note)
             }
         }
