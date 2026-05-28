@@ -42,7 +42,6 @@ import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
-import com.example.almanotesmobile.utils.GoogleSignInHelper
 import com.example.almanotesmobile.utils.getLocallyDownloadedNoteIds
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
 import kotlinx.coroutines.Dispatchers
@@ -300,7 +299,6 @@ fun ProfileScreen(
         item {
             Button(
                 onClick   = {
-                    GoogleSignInHelper.signOut(context)
                     authViewModel.logout()
                 },
                 modifier  = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),

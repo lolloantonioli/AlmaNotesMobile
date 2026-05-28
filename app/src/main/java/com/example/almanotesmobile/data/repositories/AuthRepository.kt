@@ -22,7 +22,6 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         val REVIEW_COUNT      = intPreferencesKey("review_count")
         val DOWNLOADED_IDS    = stringSetPreferencesKey("downloaded_ids")
 
-        val GOOGLE_ID = stringPreferencesKey("google_id")
     }
 
     val isRegistered: Flow<Boolean> = dataStore.data.map { it[Keys.IS_REGISTERED] ?: false }
@@ -37,7 +36,6 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         prefs[Keys.DOWNLOADED_IDS].orEmpty().mapNotNull { it.toLongOrNull() }
     }
 
-    val googleId: Flow<String> = dataStore.data.map { it[Keys.GOOGLE_ID] ?: "" }
 
     suspend fun saveRegistration(username: String, email: String, password: String) {
         dataStore.edit { prefs ->
@@ -106,24 +104,6 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
             if (isReg) prefs[Keys.IS_LOGGED_IN] = true
         }
         return isReg
-    }
-
-    suspend fun loginWithGoogle(
-        googleId: String,
-        displayName: String,
-        email: String,
-        photoUrl: String?
-    ): Boolean {
-        dataStore.edit { prefs ->
-            prefs[Keys.USERNAME]      = displayName.ifBlank { "Utente Google" }
-            prefs[Keys.EMAIL]         = email
-            prefs[Keys.PASSWORD]      = ""          // niente password per utenti Google
-            prefs[Keys.IS_REGISTERED] = true
-            prefs[Keys.IS_LOGGED_IN]  = true
-            prefs[Keys.GOOGLE_ID]     = googleId
-            if (!photoUrl.isNullOrBlank()) prefs[Keys.PROFILE_IMAGE_URI] = photoUrl
-        }
-        return true
     }
 
     suspend fun logout() {

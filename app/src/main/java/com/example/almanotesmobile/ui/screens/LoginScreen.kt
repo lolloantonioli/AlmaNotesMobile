@@ -2,14 +2,6 @@ package com.example.almanotesmobile.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
-import android.util.Log
-import android.widget.Toast
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import kotlinx.coroutines.launch
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -62,8 +54,6 @@ fun LoginScreen(
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-    val credentialManager = remember { CredentialManager.create(context) }
 
     val almaRed = Color(0xFFBB2E29)
     val cardBg  = Color(0xFFFAFAFA)
@@ -187,62 +177,6 @@ fun LoginScreen(
                     modifier = Modifier.fillMaxWidth().height(45.dp)
                 ) {
                     Text("Accedi", color = Color.White)
-                }
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text("Oppure accedi con", color = Color.DarkGray, fontSize = 12.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                Spacer(modifier = Modifier.height(10.dp))
-                Text("Oppure accedi con", color = Color.Gray, fontSize = 12.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = {
-                        coroutineScope.launch {
-                            try {
-                                val signInWithGoogleOption = GetSignInWithGoogleOption.Builder(context.getString(R.string.web_client_id))
-                                    .build()
-
-                                val request = GetCredentialRequest.Builder()
-                                    .addCredentialOption(signInWithGoogleOption)
-                                    .build()
-
-                                val result = credentialManager.getCredential(request = request, context = context)
-                                val credential = result.credential
-
-                                if (credential is CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                    val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                    viewModel.loginWithGoogle(
-                                        googleId = googleIdTokenCredential.id,
-                                        displayName = googleIdTokenCredential.displayName.orEmpty(),
-                                        email = googleIdTokenCredential.id,
-                                        photoUrl = null
-                                    ) { success ->
-                                        if (success) onLoginSuccess() else errorMessage = "Accesso con Google non riuscito"
-                                    }
-                                } else {
-                                    errorMessage = "Credenziale Google non valida"
-                                }
-                            } catch (e: Exception) {
-                                Log.e("LoginScreen", "errore durante l'accesso con Google", e)
-                                Toast.makeText(context, "Accesso con Google annullato", Toast.LENGTH_SHORT).show()
-                            }
-                        }
-                    },
-                    modifier = Modifier.fillMaxWidth().height(45.dp)
-                ) {
-                    Text("Continua con Google")
-                }
-
-                Spacer(modifier = Modifier.height(8.dp))
-
-                OutlinedButton(
-                    onClick = { errorMessage = "Accesso con Apple non ancora disponibile" },
-                    modifier = Modifier.fillMaxWidth().height(45.dp),
-                    enabled = false
-                ) {
-                    Text("Continua con Apple", color = Color.Gray)
                 }
 
                 if (biometricAvailable && biometricEnabled) {
