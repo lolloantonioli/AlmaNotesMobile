@@ -15,7 +15,6 @@ import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
 import com.example.almanotesmobile.utils.downloadPdfToInternalStorage
 import com.example.almanotesmobile.utils.getPdfFile
-import com.example.almanotesmobile.utils.markNoteAsDownloaded
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -97,7 +96,7 @@ class PdfViewerViewModel(
                 // Conteggiamo l'apertura come un download/visualizzazione in ogni caso,
                 // anche se il file è stato caricato dall'utente.
                 repository.incrementDownload(noteId)
-                markNoteAsDownloaded(context, noteId)
+
                 val downloadedCount = authRepository.markNoteAsDownloaded(noteId)
                 publishCountBadgesIfNew(
                     authRepository = authRepository,
@@ -157,8 +156,6 @@ class PdfViewerViewModel(
                 resolver.update(uri, complete, null, null)
             }
 
-            repository.incrementDownload(noteId)
-            markNoteAsDownloaded(context, noteId)
             val downloadedCount = authRepository.markNoteAsDownloaded(noteId)
             publishCountBadgesIfNew(
                 authRepository = authRepository,

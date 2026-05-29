@@ -8,19 +8,27 @@ import com.example.almanotesmobile.data.notifications.reviewBadgeDefinitions
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class ReviewsViewModel(
     private val repository: NoteRepository,
     private val authRepository: AuthRepository,
     private val notificationRepository: NotificationRepository
 ) : ViewModel() {
 
-    val downloadedNotes: StateFlow<List<Note>> = repository.getDownloadedNotes()
+    val downloadedNotes: StateFlow<List<Note>> = authRepository.downloadedNoteIds
+        .flatMapLatest { ids ->
+            if (ids.isEmpty()) flowOf(emptyList())
+            else repository.getNotesByIds(ids)
+        }
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -30,7 +38,7 @@ class ReviewsViewModel(
     fun rateNote(noteId: Long, rating: Int) {
         viewModelScope.launch {
             repository.updateRating(noteId, rating)
-            val reviewCount = authRepository.incrementReviewCount()
+            val reviewCount = authRepository.markNoteReviewed(noteId)
             publishCountBadgesIfNew(
                 authRepository = authRepository,
                 notificationRepository = notificationRepository,

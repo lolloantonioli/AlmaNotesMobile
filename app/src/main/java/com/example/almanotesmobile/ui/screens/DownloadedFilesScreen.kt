@@ -23,15 +23,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.data.local.Note
-import com.example.almanotesmobile.utils.getLocallyDownloadedNoteIds
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 
 @Composable
@@ -42,26 +35,6 @@ fun DownloadedFilesScreen(
     val downloadedNotes by viewModel.downloadedNotes.collectAsStateWithLifecycle()
     var selectedNote by remember { mutableStateOf<Note?>(null) }
     val almaRed = Color(0xFFBB2E29)
-    val context = LocalContext.current
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val screenScope = rememberCoroutineScope()
-
-    DisposableEffect(lifecycleOwner, context) {
-        fun refreshDownloadedNotes() {
-            screenScope.launch {
-                val ids = withContext(Dispatchers.IO) { getLocallyDownloadedNoteIds(context) }
-                viewModel.setDownloadedNoteIds(ids)
-            }
-        }
-
-        refreshDownloadedNotes()
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) refreshDownloadedNotes()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
 
     Column(
         modifier = Modifier

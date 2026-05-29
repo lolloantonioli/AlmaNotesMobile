@@ -10,8 +10,6 @@ import java.net.URL
 
 /** Scarica il PDF nella cartella privata dell'app (non visibile in Downloads). */
 
-private const val DOWNLOADED_NOTES_PREFS = "downloaded_notes"
-private const val DOWNLOADED_NOTE_IDS_KEY = "downloaded_note_ids"
 
 suspend fun downloadPdfToInternalStorage(
     context: Context,
@@ -42,7 +40,6 @@ suspend fun downloadPdfToInternalStorage(
                 }
             }
         }
-        markNoteAsDownloaded(context, noteId)
         dest
     } catch (e: Exception) {
         null
@@ -54,32 +51,4 @@ fun getPdfFile(context: Context, noteId: Long): File =
     File(context.filesDir, "pdfs/$noteId.pdf")
 
 
-fun markNoteAsDownloaded(context: Context, noteId: Long) {
-    val prefs = context.getSharedPreferences(DOWNLOADED_NOTES_PREFS, Context.MODE_PRIVATE)
-    val updatedIds = prefs.getStringSet(DOWNLOADED_NOTE_IDS_KEY, emptySet())
-        .orEmpty()
-        .toMutableSet()
-        .apply { add(noteId.toString()) }
 
-    prefs.edit()
-        .putStringSet(DOWNLOADED_NOTE_IDS_KEY, updatedIds)
-        .commit()
-}
-
-/** Restituisce gli ID delle note di cui l'utente ha un PDF in cache locale. */
-fun getLocallyDownloadedNoteIds(context: Context): List<Long> {
-    val prefs = context.getSharedPreferences(DOWNLOADED_NOTES_PREFS, Context.MODE_PRIVATE)
-    val persistedIds = prefs.getStringSet(DOWNLOADED_NOTE_IDS_KEY, emptySet())
-        .orEmpty()
-        .mapNotNull { it.toLongOrNull() }
-    val pdfDir = File(context.filesDir, "pdfs")
-    val cachedIds = if (!pdfDir.exists()) {
-        emptyList()
-    } else {
-        pdfDir.listFiles()
-            ?.mapNotNull { it.nameWithoutExtension.toLongOrNull() }
-            ?: emptyList()
-    }
-
-    return (persistedIds + cachedIds).distinct()
-}

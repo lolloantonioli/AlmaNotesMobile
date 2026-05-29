@@ -141,7 +141,14 @@ fun LoginScreen(
                     value = email,
                     onValueChange = { email = it; errorMessage = null },
                     placeholder = { Text("Email address") },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedPlaceholderColor = Color.DarkGray,
+                        unfocusedPlaceholderColor = Color.DarkGray,
+                        cursorColor = almaRed
+                    )
                 )
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -151,7 +158,14 @@ fun LoginScreen(
                     onValueChange = { password = it; errorMessage = null },
                     placeholder = { Text("Password") },
                     visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.Black,
+                        unfocusedTextColor = Color.Black,
+                        focusedPlaceholderColor = Color.DarkGray,
+                        unfocusedPlaceholderColor = Color.DarkGray,
+                        cursorColor = almaRed
+                    )
                 )
 
                 if (errorMessage != null) {

@@ -18,12 +18,6 @@ class ProfileViewModel(
     // si aggiorna in automatico quando cambia
     private val username: Flow<String> = authRepository.username
 
-    // ── ID dei PDF in cache locale (impostati da ProfileScreen) ──────────────
-    private val _downloadedIds = MutableStateFlow<List<Long>>(emptyList())
-
-    fun setDownloadedNoteIds(ids: List<Long>) {
-        _downloadedIds.value = ids
-    }
 
     // ── I file che hai caricato ───────────────────────────────────────────────
     // Reattivo: quando viene inserita una nuova nota, Room notifica il Flow
@@ -41,15 +35,15 @@ class ProfileViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    // ── I file che hai scaricato (PDF in cache locale) ────────────────────────
-    val downloadedNotes: StateFlow<List<Note>> = _downloadedIds
+    // ── I file che hai scaricato con l'account corrente ──────────────────────
+    val downloadedNotes: StateFlow<List<Note>> = authRepository.downloadedNoteIds
         .flatMapLatest { ids ->
             if (ids.isEmpty()) flowOf(emptyList())
             else noteRepository.getNotesByIds(ids).map { it.take(3) }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    val downloadedCount: StateFlow<Int> = _downloadedIds
+    val downloadedCount: StateFlow<Int> = authRepository.downloadedNoteIds
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 

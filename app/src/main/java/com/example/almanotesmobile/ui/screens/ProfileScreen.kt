@@ -37,17 +37,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import androidx.core.content.FileProvider
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
-import com.example.almanotesmobile.utils.getLocallyDownloadedNoteIds
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
 import java.text.NumberFormat
@@ -105,28 +98,6 @@ fun ProfileScreen(
     val password by authViewModel.password.collectAsStateWithLifecycle()
     var showPassword by remember { mutableStateOf(false) }
 
-    val lifecycleOwner = LocalLifecycleOwner.current
-    val profileScope = rememberCoroutineScope()
-
-    // Note localmente in cache → "file scaricati".
-    // Aggiorna anche quando si torna dal visualizzatore PDF, perché la schermata
-    // profilo può restare nello stack e LaunchedEffect(Unit) non verrebbe rilanciato.
-    DisposableEffect(lifecycleOwner, context) {
-        fun refreshDownloadedNotes() {
-            profileScope.launch {
-                val ids = withContext(Dispatchers.IO) { getLocallyDownloadedNoteIds(context) }
-                profileViewModel.setDownloadedNoteIds(ids)
-            }
-        }
-
-        refreshDownloadedNotes()
-        val observer = LifecycleEventObserver { _, event ->
-            if (event == Lifecycle.Event.ON_RESUME) refreshDownloadedNotes()
-        }
-        lifecycleOwner.lifecycle.addObserver(observer)
-
-        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
-    }
     val uploadedNotes   by profileViewModel.uploadedNotes.collectAsStateWithLifecycle()
     val uploadedCount   by profileViewModel.uploadedCount.collectAsStateWithLifecycle()
     val downloadedNotes by profileViewModel.downloadedNotes.collectAsStateWithLifecycle()
