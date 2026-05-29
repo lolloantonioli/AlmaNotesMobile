@@ -8,6 +8,8 @@ import android.os.ParcelFileDescriptor
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.data.notifications.downloadBadgeDefinitions
+import com.example.almanotesmobile.data.notifications.publishCountBadgesIfNew
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
@@ -18,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -95,16 +98,25 @@ class PdfViewerViewModel(
                 // anche se il file è stato caricato dall'utente.
                 repository.incrementDownload(noteId)
                 markNoteAsDownloaded(context, noteId)
-                authRepository.markNoteAsDownloaded(noteId)
+                val downloadedCount = authRepository.markNoteAsDownloaded(noteId)
+                publishCountBadgesIfNew(
+                    authRepository = authRepository,
+                    notificationRepository = notificationRepository,
+                    count = downloadedCount,
+                    badges = downloadBadgeDefinitions
+                )
                 notificationRepository.publish(
                     title = "Download registrato",
                     message = "Hai scaricato/aperto \"${note.title}\"."
                 )
-                notificationRepository.publish(
-                    title = "Push candidata: nuovo download",
-                    message = "Qualcuno ha scaricato il file \"${note.title}\" che hai caricato.",
-                    isPushCandidate = true
-                )
+                val currentUsername = authRepository.username.first()
+                if (note.uploaderName == currentUsername) {
+                    notificationRepository.publish(
+                        title = "Nuovo download ricevuto",
+                        message = "Il tuo documento \"${note.title}\" è stato scaricato.",
+                        sendPush = true
+                    )
+                }
                 _state.value = PdfViewerState.Ready(pages, note)
             }
         }
@@ -147,7 +159,13 @@ class PdfViewerViewModel(
 
             repository.incrementDownload(noteId)
             markNoteAsDownloaded(context, noteId)
-            authRepository.markNoteAsDownloaded(noteId)
+            val downloadedCount = authRepository.markNoteAsDownloaded(noteId)
+            publishCountBadgesIfNew(
+                authRepository = authRepository,
+                notificationRepository = notificationRepository,
+                count = downloadedCount,
+                badges = downloadBadgeDefinitions
+            )
             true
         } catch (_: Exception) {
             false

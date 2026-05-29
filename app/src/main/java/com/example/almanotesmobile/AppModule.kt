@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.room.Room
 import com.example.almanotesmobile.data.local.NoteDatabase
+import com.example.almanotesmobile.data.notifications.AndroidPushNotifier
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
@@ -24,7 +25,7 @@ val appModule = module {
 
     // Auth
     single { AuthRepository(get()) }
-    viewModel { AuthViewModel(get()) }
+    viewModel { AuthViewModel(get(), get()) }
 
     // Room
     single {
@@ -38,14 +39,15 @@ val appModule = module {
     }
     single { get<NoteDatabase>().noteDao() }
     single { NoteRepository(get()) }
-    single { NotificationRepository() }
+    single { AndroidPushNotifier(get<Context>().applicationContext) }
+    single { NotificationRepository(get()) }
 
     // ViewModels
     viewModel { HomeViewModel(get()) }
     viewModel { PdfViewerViewModel(get(), get(), get()) }
-    viewModel { UploadViewModel(get(), get()) }
+    viewModel { UploadViewModel(get(), get(), get()) }
     viewModel { SearchViewModel(get()) }
-    viewModel { ReviewsViewModel(get(), get(), get()) }viewModel { ReviewsViewModel(get(), get()) }
+    viewModel { ReviewsViewModel(get(), get(), get()) }
     viewModel { DownloadedFilesViewModel(get()) }
     viewModel { UploadedFilesViewModel(get(), get()) }
     viewModel { BadgesViewModel(get(), get()) }

@@ -24,10 +24,20 @@ import com.example.almanotesmobile.ui.navigation.Route
 import com.example.almanotesmobile.ui.screens.*
 import com.example.almanotesmobile.ui.theme.AlmaNotesMobileTheme
 import org.koin.androidx.compose.koinViewModel
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 
 class MainActivity : FragmentActivity() {
+    private val notificationPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        requestNotificationPermissionIfNeeded()
         enableEdgeToEdge()
         setContent {
             val authViewModel = koinViewModel<AuthViewModel>()
@@ -196,6 +206,16 @@ class MainActivity : FragmentActivity() {
                     }
                 }
             }
+        }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+
+        val permission = Manifest.permission.POST_NOTIFICATIONS
+        val hasPermission = ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED
+        if (!hasPermission) {
+            notificationPermissionLauncher.launch(permission)
         }
     }
 }

@@ -5,9 +5,13 @@ import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.data.notifications.publishCountBadgesIfNew
+import com.example.almanotesmobile.data.notifications.uploadBadgeDefinitions
+import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -15,14 +19,14 @@ import java.io.FileOutputStream
 
 class UploadViewModel(
     private val repository: NoteRepository,
-    private val notificationRepository: NotificationRepository
+    private val notificationRepository: NotificationRepository,
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
     fun uploadNote(
         context: Context,
         uri: Uri,
         title: String,
-        description: String,
         professor: String,
         course: String,
         uploaderName: String, // Passiamo lo username reale
@@ -41,6 +45,13 @@ class UploadViewModel(
                     uploadedAt = System.currentTimeMillis()
                 )
                 repository.insert(newNote)
+                val uploadedCount = repository.getNotesByUploader(uploaderName).first().size
+                publishCountBadgesIfNew(
+                    authRepository = authRepository,
+                    notificationRepository = notificationRepository,
+                    count = uploadedCount,
+                    badges = uploadBadgeDefinitions
+                )
                 notificationRepository.publish(
                     title = "Upload completato",
                     message = "Hai caricato \"$title\" con successo."

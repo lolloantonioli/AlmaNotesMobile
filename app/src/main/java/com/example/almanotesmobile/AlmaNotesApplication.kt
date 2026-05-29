@@ -1,7 +1,7 @@
 package com.example.almanotesmobile
 
 import android.app.Application
-import com.example.almanotesmobile.data.MockData
+import com.example.almanotesmobile.data.notifications.AndroidPushNotifier
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,10 +21,8 @@ class AlmaNotesApplication : Application() {
             modules(appModule)
         }
 
-        // Popola il DB solo al primo avvio
-        CoroutineScope(Dispatchers.IO).launch {
-            val repo = KoinPlatform.getKoin().get<NoteRepository>()
-            if (repo.count() == 0) repo.insertAll(MockData.notes)
-        }
+        KoinPlatform.getKoin().get<AndroidPushNotifier>().createNotificationChannels()
+
+
     }
 }

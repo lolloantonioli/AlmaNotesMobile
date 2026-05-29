@@ -2,13 +2,19 @@ package com.example.almanotesmobile.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.almanotesmobile.data.notifications.profileImageBadgeDefinition
+import com.example.almanotesmobile.data.notifications.publishBadgeIfNew
 import com.example.almanotesmobile.data.repositories.AuthRepository
+import com.example.almanotesmobile.data.repositories.NotificationRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
+class AuthViewModel(
+    private val repository: AuthRepository,
+    private val notificationRepository: NotificationRepository
+) : ViewModel() {
 
     val isRegistered: StateFlow<Boolean?> = repository.isRegistered
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
@@ -28,6 +34,9 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     val profileImageUri: StateFlow<String?> = repository.profileImageUri
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    val password: StateFlow<String> = repository.password
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
+
     fun register(username: String, email: String, password: String) {
         viewModelScope.launch { repository.saveRegistration(username, email, password) }
     }
@@ -40,7 +49,10 @@ class AuthViewModel(private val repository: AuthRepository) : ViewModel() {
     }
 
     fun updateProfileImage(uri: String) {
-        viewModelScope.launch { repository.updateProfileImage(uri) }
+        viewModelScope.launch {
+            repository.updateProfileImage(uri)
+            publishBadgeIfNew(repository, notificationRepository, profileImageBadgeDefinition)
+        }
     }
 
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {

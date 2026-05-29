@@ -25,14 +25,14 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun NotificationsScreen(viewModel: NotificationsViewModel = koinViewModel()) {
     val notifications = viewModel.notifications.collectAsStateWithLifecycle()
-
+    
     if (notifications.value.isEmpty()) {
         Column(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.Center) {
             Text("Nessuna notifica al momento.", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         return
     }
-
+    
     LazyColumn(modifier = Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
         items(notifications.value, key = { it.id }) { notification ->
             NotificationItem(notification)
@@ -43,17 +43,17 @@ fun NotificationsScreen(viewModel: NotificationsViewModel = koinViewModel()) {
 @Composable
 private fun NotificationItem(notification: AppNotification) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    modifier = Modifier.fillMaxWidth(),
+    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+    elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(notification.title, fontWeight = FontWeight.Bold, color = Color(0xFFBB2E29))
             Spacer(Modifier.height(6.dp))
             Text(notification.message, color = MaterialTheme.colorScheme.onSurface)
-            if (notification.isPushCandidate) {
+            if (notification.isPushNotification) {
                 Spacer(Modifier.height(8.dp))
-                Text("Push candidata (da inviare via backend/FCM)", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text("Inviata anche come notifica push", color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

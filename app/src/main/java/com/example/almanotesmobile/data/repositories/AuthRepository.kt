@@ -18,9 +18,9 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         val IS_REGISTERED     = booleanPreferencesKey("is_registered")
         val IS_LOGGED_IN      = booleanPreferencesKey("is_logged_in")
         val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
-        val PROFILE_IMAGE_URI = stringPreferencesKey("profile_image_uri")
         val REVIEW_COUNT      = intPreferencesKey("review_count")
         val DOWNLOADED_IDS    = stringSetPreferencesKey("downloaded_ids")
+        val AWARDED_BADGES    = stringSetPreferencesKey("awarded_badges")
 
     }
 
@@ -30,7 +30,11 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
 
     val username: Flow<String> = dataStore.data.map { it[Keys.USERNAME] ?: "" }
     val email: Flow<String> = dataStore.data.map { it[Keys.EMAIL] ?: "" }
-    val profileImageUri: Flow<String?> = dataStore.data.map { it[Keys.PROFILE_IMAGE_URI] }
+    val password: Flow<String> = dataStore.data.map { it[Keys.PASSWORD] ?: "" }
+    val profileImageUri: Flow<String?> = dataStore.data.map { prefs ->
+        val accountKey = prefs.currentProfileImageKey()
+        accountKey?.let { prefs[it] }
+    }
     val reviewCount: Flow<Int> = dataStore.data.map { it[Keys.REVIEW_COUNT] ?: 0 }
     val downloadedNoteIds: Flow<List<Long>> = dataStore.data.map { prefs ->
         prefs[Keys.DOWNLOADED_IDS].orEmpty().mapNotNull { it.toLongOrNull() }
@@ -59,11 +63,16 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun updateProfileImage(uri: String) {
-        dataStore.edit { it[Keys.PROFILE_IMAGE_URI] = uri }
+        dataStore.edit { prefs ->
+            val accountKey = prefs.currentProfileImageKey()
+            if (accountKey != null) {
+                prefs[accountKey] = uri
+            }
+        }
     }
 
     suspend fun saveProfileImage(path: String) {
-        dataStore.edit { it[Keys.PROFILE_IMAGE_URI] = path }
+        updateProfileImage(path)
     }
 
     suspend fun login(email: String, password: String): Boolean {
@@ -110,18 +119,49 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         dataStore.edit { it[Keys.IS_LOGGED_IN] = false }
     }
 
-    suspend fun incrementReviewCount() {
+    suspend fun incrementReviewCount(): Int {
+        var updated = 0
         dataStore.edit { prefs ->
             val current = prefs[Keys.REVIEW_COUNT] ?: 0
-            prefs[Keys.REVIEW_COUNT] = current + 1
+            updated = current + 1
+            prefs[Keys.REVIEW_COUNT] = updated
         }
+        return updated
     }
 
-    suspend fun markNoteAsDownloaded(noteId: Long) {
+    suspend fun markNoteAsDownloaded(noteId: Long): Int {
+        var updatedCount = 0
         dataStore.edit { prefs ->
             val set = prefs[Keys.DOWNLOADED_IDS].orEmpty().toMutableSet()
             set.add(noteId.toString())
             prefs[Keys.DOWNLOADED_IDS] = set
+            updatedCount = set.size
         }
+        return updatedCount
+    }
+
+    suspend fun markBadgeAwardedIfNew(badgeId: String): Boolean {
+        var isNew = false
+        dataStore.edit { prefs ->
+            val accountScopedBadgeId = "${prefs.currentAccountId()}:$badgeId"
+            val badges = prefs[Keys.AWARDED_BADGES].orEmpty().toMutableSet()
+            isNew = badges.add(accountScopedBadgeId)
+            if (isNew) {
+                prefs[Keys.AWARDED_BADGES] = badges
+            }
+        }
+        return isNew
+    }
+
+    private fun Preferences.currentProfileImageKey(): Preferences.Key<String>? {
+        val accountId = currentAccountId()
+        if (accountId.isBlank()) return null
+        return stringPreferencesKey("profile_image_uri_$accountId")
+    }
+
+    private fun Preferences.currentAccountId(): String {
+        return this[Keys.EMAIL].orEmpty().ifBlank { this[Keys.USERNAME].orEmpty() }
+            .lowercase()
+            .replace(Regex("[^a-z0-9._-]"), "_")
     }
 }

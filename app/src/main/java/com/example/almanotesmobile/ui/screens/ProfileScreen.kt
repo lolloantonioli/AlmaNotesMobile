@@ -20,6 +20,7 @@ import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material.icons.outlined.Lock
 import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -101,6 +102,8 @@ fun ProfileScreen(
     val username        by authViewModel.username.collectAsStateWithLifecycle()
     val email           by authViewModel.email.collectAsStateWithLifecycle()
     val profileImageUri by authViewModel.profileImageUri.collectAsStateWithLifecycle()
+    val password by authViewModel.password.collectAsStateWithLifecycle()
+    var showPassword by remember { mutableStateOf(false) }
 
     val lifecycleOwner = LocalLifecycleOwner.current
     val profileScope = rememberCoroutineScope()
@@ -212,7 +215,14 @@ fun ProfileScreen(
                         HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
                         CredentialRow(Icons.Outlined.Email, "E-mail", email.ifEmpty { "non impostata" })
                         HorizontalDivider(Modifier.padding(vertical = 10.dp), color = Color(0xFFF0F0F0))
-                        CredentialRow(Icons.Outlined.Lock, "Password", "••••••••••••", isPassword = true)
+                        CredentialRow(
+                            icon = Icons.Outlined.Lock,
+                            label = "Password",
+                            value = if (showPassword) password else "••••••••••••",
+                            isPassword = true,
+                            isPasswordVisible = showPassword,
+                            onPasswordVisibilityClick = { showPassword = !showPassword }
+                        )
                     }
                 }
             }
@@ -496,15 +506,30 @@ private fun AchievementCard(points: Long, modifier: Modifier = Modifier) {
 // ─── Riga credenziale ────────────────────────────────────────────────────────
 
 @Composable
-fun CredentialRow(icon: ImageVector, label: String, value: String, isPassword: Boolean = false) {
+fun CredentialRow(
+    icon: ImageVector,
+    label: String,
+    value: String,
+    isPassword: Boolean = false,
+    isPasswordVisible: Boolean = false,
+    onPasswordVisibilityClick: (() -> Unit)? = null
+) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = Color.DarkGray, modifier = Modifier.size(18.dp))
+        Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
             Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
             Text(value, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
         }
-        if (isPassword) Icon(Icons.Outlined.Visibility, null,
-            tint = Color.LightGray, modifier = Modifier.size(18.dp))
+        if (isPassword && onPasswordVisibilityClick != null) {
+            IconButton(onClick = onPasswordVisibilityClick, modifier = Modifier.size(32.dp)) {
+                Icon(
+                    imageVector = if (isPasswordVisible) Icons.Outlined.VisibilityOff else Icons.Outlined.Visibility,
+                    contentDescription = if (isPasswordVisible) "Nascondi password" else "Mostra password",
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
     }
 }

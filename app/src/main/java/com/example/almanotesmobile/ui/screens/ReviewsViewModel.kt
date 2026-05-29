@@ -3,11 +3,14 @@ package com.example.almanotesmobile.ui.screens
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.data.notifications.publishCountBadgesIfNew
+import com.example.almanotesmobile.data.notifications.reviewBadgeDefinitions
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -27,17 +30,24 @@ class ReviewsViewModel(
     fun rateNote(noteId: Long, rating: Int) {
         viewModelScope.launch {
             repository.updateRating(noteId, rating)
-            authRepository.incrementReviewCount()
+            val reviewCount = authRepository.incrementReviewCount()
+            publishCountBadgesIfNew(
+                authRepository = authRepository,
+                notificationRepository = notificationRepository,
+                count = reviewCount,
+                badges = reviewBadgeDefinitions
+            )
             val note = repository.getNoteById(noteId)
             notificationRepository.publish(
                 title = "Recensione inviata",
                 message = "Hai recensito \"${note?.title ?: "appunto"}\" con $rating stelle."
             )
-            note?.let {
+            val currentUsername = authRepository.username.first()
+            if (note != null && note.uploaderName == currentUsername) {
                 notificationRepository.publish(
-                    title = "Push candidata: nuova recensione",
-                    message = "Un utente ha recensito il tuo file \"${it.title}\".",
-                    isPushCandidate = true
+                    title = "Nuova recensione ricevuta",
+                    message = "Il tuo documento \"${note.title}\" ha ricevuto una recensione da $rating stelle.",
+                    sendPush = true
                 )
             }
         }

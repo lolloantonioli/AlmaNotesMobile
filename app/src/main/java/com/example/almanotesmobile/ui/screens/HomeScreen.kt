@@ -1,6 +1,7 @@
 package com.example.almanotesmobile.ui.screens
 
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -25,6 +26,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -127,33 +130,35 @@ fun HomeScreen(
 private fun HeroSection(onSearchClick: () -> Unit) {
     val almaRed = Color(0xFFBB2E29)
 
+
+
+    // Overlay scuro opzionale (se l'immagine è troppo chiara e il testo non si legge)
     Box(
         modifier = Modifier
-            .fillMaxWidth()
-            .height(230.dp)
+            .fillMaxSize()
+            .height(260.dp)
     ) {
-        // Sfondo + archi decorativi bianchi
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            drawRect(color = almaRed)
 
-            val stroke = Stroke(width = 2.dp.toPx())
-            val white  = Color.White
+        // Immagine di sfondo caricata dai drawable
+        Image(
+            painter = painterResource(id = com.example.almanotesmobile.R.drawable.sfondo),
+            contentDescription = null,
+            modifier = Modifier.fillMaxSize(),
+            contentScale = ContentScale.Crop // Taglia l'immagine per riempire tutto lo spazio
+        )
 
-            drawCircle(white.copy(alpha = 0.18f), radius = size.width * 0.90f,
-                center = Offset(size.width * 1.05f,  size.height * 0.05f), style = stroke)
-            drawCircle(white.copy(alpha = 0.13f), radius = size.width * 1.10f,
-                center = Offset(size.width * 0.70f,  size.height * 1.20f), style = stroke)
-            drawCircle(white.copy(alpha = 0.10f), radius = size.width * 0.65f,
-                center = Offset(-size.width * 0.05f, size.height * 0.65f), style = stroke)
-            drawCircle(white.copy(alpha = 0.08f), radius = size.width * 0.50f,
-                center = Offset(size.width * 0.50f, -size.height * 0.20f), style = stroke)
-        }
+        // 3. Overlay scuro messo SOPRA l'immagine, non come background del Box genitore
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(Color.Black.copy(alpha = 0.35f)) // Leggermente scurito per contrasto
+        )
 
         Column(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 24.dp)
-                .padding(top = 28.dp, bottom = 22.dp),
+                .padding(top = 36.dp, bottom = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -162,18 +167,18 @@ private fun HeroSection(onSearchClick: () -> Unit) {
                 Text(
                     text = "Gli appunti giusti\nper ogni esame",
                     color = Color.White,
-                    fontSize = 22.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
-                    lineHeight = 30.sp
+                    lineHeight = 32.sp
                 )
-                Spacer(Modifier.height(8.dp))
+                Spacer(Modifier.height(12.dp))
                 Text(
                     text = "Trova e condividi appunti specifici per ogni\ninsegnamento e professore dell'Unibo",
                     color = Color.White.copy(alpha = 0.88f),
-                    fontSize = 12.sp,
+                    fontSize = 14.sp,
                     textAlign = TextAlign.Center,
-                    lineHeight = 17.sp
+                    lineHeight = 20.sp
                 )
             }
 
@@ -184,7 +189,7 @@ private fun HeroSection(onSearchClick: () -> Unit) {
                     .clickable(onClick = onSearchClick),
                 shape = RoundedCornerShape(24.dp),
                 color = Color.White,
-                shadowElevation = 4.dp
+                shadowElevation = 6.dp
             ) {
                 Row(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 11.dp),
@@ -194,13 +199,13 @@ private fun HeroSection(onSearchClick: () -> Unit) {
                         imageVector = Icons.Default.Search,
                         contentDescription = "Cerca",
                         tint = almaRed,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(20.dp)
                     )
-                    Spacer(Modifier.width(10.dp))
+                    Spacer(Modifier.width(12.dp))
                     Text(
                         text = "Cerca per esame, professore o argomento",
                         color = Color.Gray,
-                        fontSize = 13.sp
+                        fontSize = 14.sp
                     )
                 }
             }
