@@ -1,6 +1,6 @@
 package com.example.almanotesmobile.ui.screens
 
-import androidx.compose.foundation.Canvas
+
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -22,9 +22,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
@@ -38,7 +36,7 @@ import com.example.almanotesmobile.data.local.Note
 import org.koin.androidx.compose.koinViewModel
 import java.util.Locale
 
-// ─── Utility ─────────────────────────────────────────────────────────────────
+//Utility
 
 private fun Int.toFormattedCount(): String = when {
     this >= 1_000_000 -> String.format(Locale.ITALIAN, "%.1fM", this / 1_000_000f)
@@ -60,7 +58,7 @@ private fun Long.toRelativeTimeString(): String {
     }
 }
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
+// Screen
 
 @Composable
 fun HomeScreen(
@@ -124,7 +122,7 @@ fun HomeScreen(
     }
 }
 
-// ─── Hero ─────────────────────────────────────────────────────────────────────
+// Hero
 
 @Composable
 private fun HeroSection(onSearchClick: () -> Unit) {
@@ -132,7 +130,7 @@ private fun HeroSection(onSearchClick: () -> Unit) {
 
 
 
-    // Overlay scuro opzionale (se l'immagine è troppo chiara e il testo non si legge)
+    // Overlay scuro opzionale
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -144,14 +142,14 @@ private fun HeroSection(onSearchClick: () -> Unit) {
             painter = painterResource(id = com.example.almanotesmobile.R.drawable.sfondo),
             contentDescription = null,
             modifier = Modifier.fillMaxSize(),
-            contentScale = ContentScale.Crop // Taglia l'immagine per riempire tutto lo spazio
+            contentScale = ContentScale.Crop
         )
 
-        // 3. Overlay scuro messo SOPRA l'immagine, non come background del Box genitore
+        // Overlay scuro sopra l'immagine
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(Color.Black.copy(alpha = 0.35f)) // Leggermente scurito per contrasto
+                .background(Color.Black.copy(alpha = 0.35f))
         )
 
         Column(
@@ -182,7 +180,7 @@ private fun HeroSection(onSearchClick: () -> Unit) {
                 )
             }
 
-            // Barra di ricerca (tappabile → SearchScreen)
+            // Barra di ricerca
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -213,7 +211,7 @@ private fun HeroSection(onSearchClick: () -> Unit) {
     }
 }
 
-// ─── Componenti sezione ───────────────────────────────────────────────────────
+//Componenti sezione
 
 @Composable
 private fun SectionHeader(icon: ImageVector, title: String, modifier: Modifier = Modifier) {
@@ -253,7 +251,7 @@ private fun NoteListCard(
     }
 }
 
-// ─── Righe delle note ─────────────────────────────────────────────────────────
+// Righe delle note
 
 @Composable
 private fun DownloadedNoteRow(note: Note, onClick: () -> Unit) {

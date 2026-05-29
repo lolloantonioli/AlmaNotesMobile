@@ -8,7 +8,7 @@ import java.io.FileOutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-/** Scarica il PDF nella cartella privata dell'app (non visibile in Downloads). */
+/** Scarica il PDF nella cartella privata dell'app. */
 
 
 suspend fun downloadPdfToInternalStorage(

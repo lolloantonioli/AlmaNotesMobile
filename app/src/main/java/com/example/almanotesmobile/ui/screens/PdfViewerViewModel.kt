@@ -55,7 +55,7 @@ class PdfViewerViewModel(
                 return@launch
             }
 
-            // 1. Controlliamo se il file esiste già localmente (es. caricato dall'utente)
+            // 1. Controlliamo se il file esiste già localmente
             val localFile = File(note.filePath)
             val pdfFile = if (localFile.exists() && localFile.isFile) {
                 localFile
@@ -66,7 +66,7 @@ class PdfViewerViewModel(
 
             val needsDownload = !pdfFile.exists()
 
-            // ── Download (solo se non presente localmente) ──────────────────
+            //Download
             if (needsDownload) {
                 if (note.filePath.isBlank() || !note.filePath.startsWith("http")) {
                     _state.value = PdfViewerState.Error("Nessun file disponibile localmente e URL non valido")
@@ -85,16 +85,15 @@ class PdfViewerViewModel(
                     return@launch
                 }
             }
-
-            // ── Rendering pagine ─────────────────────────────────────────────
+            // Rendering pagine
             _state.value = PdfViewerState.Rendering(0)
             val pages = renderPages(pdfFile) { p -> _state.value = PdfViewerState.Rendering(p) }
 
             if (pages == null) {
                 _state.value = PdfViewerState.Error("Impossibile aprire il file PDF")
             } else {
-                // Conteggiamo l'apertura come un download/visualizzazione in ogni caso,
-                // anche se il file è stato caricato dall'utente.
+                // Conteggiamo l'apertura come un download/visualizzazione
+
                 repository.incrementDownload(noteId)
 
                 val downloadedCount = authRepository.markNoteAsDownloaded(noteId)

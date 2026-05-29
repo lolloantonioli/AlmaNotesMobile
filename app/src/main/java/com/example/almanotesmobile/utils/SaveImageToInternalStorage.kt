@@ -16,7 +16,7 @@ fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
                 input.copyTo(output)
             }
         }
-        // Restituisce il percorso assoluto del NUOVO file copiato
+        // Restituisce il percorso assoluto del file copiato
         file.absolutePath
     } catch (e: Exception) {
         e.printStackTrace()

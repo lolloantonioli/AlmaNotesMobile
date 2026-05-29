@@ -41,12 +41,6 @@ class AuthViewModel(
         viewModelScope.launch { repository.saveRegistration(username, email, password) }
     }
 
-    fun registerWithProvider(provider: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            repository.registerWithProvider(provider)
-            onResult(true)
-        }
-    }
 
     fun updateProfileImage(uri: String) {
         viewModelScope.launch {
@@ -63,12 +57,6 @@ class AuthViewModel(
         }
     }
 
-    fun loginWithProvider(provider: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch {
-            val success = repository.loginWithProvider(provider)
-            onResult(success)
-        }
-    }
 
     fun loginWithBiometric(onResult: (Boolean) -> Unit) {
         viewModelScope.launch {

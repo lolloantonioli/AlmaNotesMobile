@@ -23,12 +23,12 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 
-// ─── Utility ─────────────────────────────────────────────────────────────────
+// Utility
 
 private fun Long.toFormattedDate(): String =
     SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(Date(this))
 
-// ─── Dialog ──────────────────────────────────────────────────────────────────
+// Dialog
 
 @Composable
 fun NoteDetailDialog(
@@ -58,7 +58,7 @@ fun NoteDetailDialog(
                     .padding(horizontal = 20.dp, vertical = 16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // ── Header ──────────────────────────────────────────────────
+                // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
@@ -91,7 +91,7 @@ fun NoteDetailDialog(
 
                 Spacer(Modifier.height(10.dp))
 
-                // ── Titolo ──────────────────────────────────────────────────
+                // Titolo
                 Text(
                     text = note.title,
                     color = almaRed,
@@ -104,7 +104,7 @@ fun NoteDetailDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                // ── Info card ───────────────────────────────────────────────
+                // Info card
                 Surface(
                     shape = RoundedCornerShape(10.dp),
                     color = bgGray,
@@ -144,7 +144,7 @@ fun NoteDetailDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                // ── Stats ───────────────────────────────────────────────────
+                // Stats
                 Row(modifier = Modifier.fillMaxWidth()) {
                     // Valutazione
                     Column(modifier = Modifier.weight(1f)) {
@@ -205,7 +205,7 @@ fun NoteDetailDialog(
                     thickness = 0.5.dp
                 )
 
-                // ── Uploader ────────────────────────────────────────────────
+                // Uploader
                 Row(modifier = Modifier.fillMaxWidth()) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text("Caricato da:", fontSize = 12.sp, color = labelGray)
@@ -228,9 +228,8 @@ fun NoteDetailDialog(
                     thickness = 0.5.dp
                 )
 
-                // Sostituisci la sezione "── Conferma download ──" e "── Bottoni ──" con:
 
-                // ── Conferma download ────────────────────────────────────────
+                // Conferma download
                 val hasFile = note.filePath.isNotBlank()
 
                 if (hasFile) {
@@ -259,7 +258,7 @@ fun NoteDetailDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                // ── Bottoni ──────────────────────────────────────────────────
+                // Bottoni
                 Row(modifier = Modifier.fillMaxWidth()) {
                     OutlinedButton(
                         onClick = onDismiss,
@@ -293,7 +292,7 @@ fun NoteDetailDialog(
     }
 }
 
-// ─── Riga info (icona + label + valore) ──────────────────────────────────────
+// Riga info (icona + label + valore)
 
 @Composable
 private fun InfoRow(

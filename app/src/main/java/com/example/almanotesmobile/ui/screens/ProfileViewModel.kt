@@ -11,16 +11,14 @@ import kotlinx.coroutines.flow.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModel(
     private val noteRepository: NoteRepository,
-    private val authRepository: AuthRepository   // <-- iniettato direttamente
+    private val authRepository: AuthRepository   // iniettato direttamente
 ) : ViewModel() {
 
-    // Username letto da DataStore: nessun rischio di timing,
-    // si aggiorna in automatico quando cambia
+
     private val username: Flow<String> = authRepository.username
 
 
-    // ── I file che hai caricato ───────────────────────────────────────────────
-    // Reattivo: quando viene inserita una nuova nota, Room notifica il Flow
+    // I file che hai caricato
     val uploadedNotes: StateFlow<List<Note>> = username
         .flatMapLatest { u ->
             if (u.isBlank()) flowOf(emptyList())
@@ -35,7 +33,7 @@ class ProfileViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    // ── I file che hai scaricato con l'account corrente ──────────────────────
+    //  I file che hai scaricato con l'account corrente
     val downloadedNotes: StateFlow<List<Note>> = authRepository.downloadedNoteIds
         .flatMapLatest { ids ->
             if (ids.isEmpty()) flowOf(emptyList())
@@ -47,15 +45,15 @@ class ProfileViewModel(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    // ── I più popolari ────────────────────────────────────────────────────────
+    // I più popolari
     val topDownloaded: StateFlow<List<Note>> = noteRepository.getTopDownloaded(3)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    // ── I fan favourites ──────────────────────────────────────────────────────
+    //  I fan favourites
     val topRated: StateFlow<List<Note>> = noteRepository.getTopRated(3)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    // ── Punti: 1.000 per file caricato + 100 per ogni visualizzazione ricevuta ─
+    // Punti: 1.000 per file caricato + 100 per ogni visualizzazione ricevuta
     val totalPoints: StateFlow<Long> = username
         .flatMapLatest { u ->
             if (u.isBlank()) flowOf(0L)

@@ -43,7 +43,7 @@ fun PdfViewerScreen(
 
     Column(modifier = Modifier.fillMaxSize()) {
 
-        // ── AppBar ─────────────────────────────────────────────────────────
+        // AppBar
         TopAppBar(
             title = {
                 Text(
@@ -87,7 +87,7 @@ fun PdfViewerScreen(
             )
         )
 
-        // ── Contenuto ──────────────────────────────────────────────────────
+        // Contenuto
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -106,7 +106,7 @@ fun PdfViewerScreen(
     }
 }
 
-// ─── Pagine ───────────────────────────────────────────────────────────────────
+// Pagine
 
 @Composable
 private fun PdfPages(pages: List<Bitmap>) {
@@ -128,7 +128,7 @@ private fun PdfPages(pages: List<Bitmap>) {
     }
 }
 
-// ─── Loading ──────────────────────────────────────────────────────────────────
+// Loading
 
 @Composable
 private fun PdfLoading(message: String, progress: Float?) {
@@ -155,7 +155,7 @@ private fun PdfLoading(message: String, progress: Float?) {
     }
 }
 
-// ─── Errore ───────────────────────────────────────────────────────────────────
+// Errore
 
 @Composable
 private fun PdfError(message: String, onRetry: () -> Unit) {

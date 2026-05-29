@@ -1,7 +1,6 @@
 package com.example.almanotesmobile.ui.screens
 
 import android.Manifest
-import android.content.Context
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.widget.Toast
@@ -46,7 +45,7 @@ import java.io.File
 import java.text.NumberFormat
 import java.util.Locale
 
-// ─── Utility ──────────────────────────────────────────────────────────────────
+// Utility
 
 private fun Long.toRelativeTimeString(): String {
     val diff = System.currentTimeMillis() - this
@@ -78,7 +77,7 @@ private fun achievementText(points: Long): String {
     }
 }
 
-// ─── Screen ──────────────────────────────────────────────────────────────────
+// Screen
 
 @Composable
 fun ProfileScreen(
@@ -109,7 +108,7 @@ fun ProfileScreen(
     var selectedNote          by remember { mutableStateOf<Note?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
 
-    // ── Camera / Gallery ────────────────────────────────────────────────────
+    // Camera
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { saveImageToInternalStorage(context, it)?.let { p -> authViewModel.updateProfileImage(p) } }
     }
@@ -134,7 +133,7 @@ fun ProfileScreen(
         else permLauncher.launch(Manifest.permission.CAMERA)
     }
 
-    // ── Layout ──────────────────────────────────────────────────────────────
+    // Layout
     LazyColumn(
         modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background),
         contentPadding = PaddingValues(bottom = 32.dp)
@@ -152,7 +151,7 @@ fun ProfileScreen(
             }
         }
 
-        // ── Card credenziali ────────────────────────────────────────────────
+        //Card credenziali
         item {
             Card(
                 modifier  = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
@@ -201,7 +200,7 @@ fun ProfileScreen(
 
         item { Spacer(Modifier.height(24.dp)) }
 
-        // ── I file che hai caricato ─────────────────────────────────────────
+        // I file che hai caricato
         item {
             ProfileSectionHeader(Icons.Default.Upload, "I file che hai caricato",
                 count = uploadedCount, showVedi = true, onVediClick = onShowUploadedNotes,
@@ -219,7 +218,7 @@ fun ProfileScreen(
 
         item { Spacer(Modifier.height(24.dp)) }
 
-        // ── I file che hai scaricato ────────────────────────────────────────
+        //I file che hai scaricato
         item {
             ProfileSectionHeader(Icons.Default.Download, "I file che hai scaricato",
                 count = downloadedCount, showVedi = true, onVediClick = onShowDownloadedNotes,
@@ -237,7 +236,7 @@ fun ProfileScreen(
 
         item { Spacer(Modifier.height(24.dp)) }
 
-        // ── I più popolari ──────────────────────────────────────────────────
+        // I più popolari
         item {
             ProfileSectionHeader(Icons.Default.TrendingUp, "I più popolari",
                 count = null, showVedi = false, modifier = Modifier.padding(horizontal = 16.dp))
@@ -251,7 +250,7 @@ fun ProfileScreen(
 
         item { Spacer(Modifier.height(24.dp)) }
 
-        // ── I fan favourites ────────────────────────────────────────────────
+        // I fan favourites
         item {
             ProfileSectionHeader(Icons.Outlined.Star, "I fan favourites",
                 count = null, showVedi = false, modifier = Modifier.padding(horizontal = 16.dp))
@@ -265,7 +264,7 @@ fun ProfileScreen(
 
         item { Spacer(Modifier.height(24.dp)) }
 
-        // ── I tuoi traguardi ────────────────────────────────────────────────
+        // I tuoi traguardi
         item {
             ProfileSectionHeader(Icons.Default.EmojiEvents, "I tuoi traguardi",
                 count = null, showVedi = true, onVediClick = onShowBadges,
@@ -276,7 +275,7 @@ fun ProfileScreen(
 
         item { Spacer(Modifier.height(32.dp)) }
 
-        // ── Logout ──────────────────────────────────────────────────────────
+        // Logout
         item {
             Button(
                 onClick   = {
@@ -294,7 +293,7 @@ fun ProfileScreen(
         item { Spacer(Modifier.height(16.dp)) }
     }
 
-    // ── Dialog nota ─────────────────────────────────────────────────────────
+    // Dialog nota
     selectedNote?.let { note ->
         NoteDetailDialog(
             note      = note,
@@ -303,7 +302,7 @@ fun ProfileScreen(
         )
     }
 
-    // ── Dialog foto profilo ─────────────────────────────────────────────────
+    // Dialog foto profilo
     if (showImageSourceDialog) {
         AlertDialog(
             onDismissRequest = { showImageSourceDialog = false },
@@ -322,7 +321,7 @@ fun ProfileScreen(
     }
 }
 
-// ─── Section header ───────────────────────────────────────────────────────────
+// Section header
 
 @Composable
 private fun ProfileSectionHeader(
@@ -356,7 +355,7 @@ private fun ProfileSectionHeader(
     }
 }
 
-// ─── Note card wrapper ────────────────────────────────────────────────────────
+// Note card wrapper
 
 @Composable
 private fun ProfileNoteCard(
@@ -387,7 +386,7 @@ private fun ProfileEmptyState(message: String, modifier: Modifier = Modifier) {
     }
 }
 
-// ─── Note rows ────────────────────────────────────────────────────────────────
+
 
 /** File caricati: titolo + prof/materia | tempo fa */
 @Composable
@@ -457,7 +456,7 @@ private fun PopularProfileRow(note: Note, onClick: () -> Unit) {
     }
 }
 
-// ─── Achievement card ─────────────────────────────────────────────────────────
+// Achievement card
 
 @Composable
 private fun AchievementCard(points: Long, modifier: Modifier = Modifier) {
@@ -474,7 +473,7 @@ private fun AchievementCard(points: Long, modifier: Modifier = Modifier) {
     }
 }
 
-// ─── Riga credenziale ────────────────────────────────────────────────────────
+// Riga credenziale
 
 @Composable
 fun CredentialRow(

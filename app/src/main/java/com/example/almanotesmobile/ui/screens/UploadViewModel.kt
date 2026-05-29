@@ -29,7 +29,7 @@ class UploadViewModel(
         title: String,
         professor: String,
         course: String,
-        uploaderName: String, // Passiamo lo username reale
+        uploaderName: String,
         onSuccess: () -> Unit
     ) {
         viewModelScope.launch {
@@ -41,7 +41,7 @@ class UploadViewModel(
                     professorName = professor,
                     subject = course,
                     filePath = filePath,
-                    uploaderName = uploaderName, // Salviamo il nome corretto
+                    uploaderName = uploaderName,
                     uploadedAt = System.currentTimeMillis()
                 )
                 repository.insert(newNote)

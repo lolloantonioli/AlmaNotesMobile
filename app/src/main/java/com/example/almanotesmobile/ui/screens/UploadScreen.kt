@@ -30,7 +30,7 @@ import androidx.compose.material3.Text
 @Composable
 fun UploadScreen(
     onUploadSuccess: () -> Unit,
-    authViewModel: AuthViewModel, // Passiamo AuthViewModel per l'uploaderName
+    authViewModel: AuthViewModel,
     viewModel: UploadViewModel = koinViewModel()
 ) {
     var fileName by remember { mutableStateOf("") }

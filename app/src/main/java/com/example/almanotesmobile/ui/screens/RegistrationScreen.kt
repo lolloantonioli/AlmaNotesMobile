@@ -44,7 +44,7 @@ fun RegistrationScreen(
             contentScale = ContentScale.Crop
         )
 
-        // 2. Card Centrale (il quadrato FAFAFA)
+        // 2. Card Centrale
         Card(
             modifier = Modifier
                 .align(Alignment.Center)
@@ -176,14 +176,6 @@ fun RegistrationScreen(
                 if (errorMessage != null) {
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(errorMessage!!, color = Color.Red, fontSize = 12.sp)
-                }
-
-                OutlinedButton(
-                    onClick = { errorMessage = "Accesso con Apple non ancora disponibile" },
-                    modifier = Modifier.fillMaxWidth().height(45.dp),
-                    enabled = false
-                ) {
-                    Text("Continua con Apple", color = Color.Gray)
                 }
             }
         }

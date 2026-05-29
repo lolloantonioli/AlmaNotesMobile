@@ -1,7 +1,6 @@
 package com.example.almanotesmobile.ui.screens
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,7 +31,6 @@ fun ThemeScreen(
     themeState: ThemeState,
     themeActions: ThemeActions
 ) {
-    // Usiamo i colori del tema di Material 3 per lo sfondo
     val backgroundColor = MaterialTheme.colorScheme.background
     // Definiamo il colore "AlmaNotes" per gli accenti (titolo, icona, ecc.)
     val almaRed = Color(0xFFBB2E29)
@@ -46,7 +44,7 @@ fun ThemeScreen(
                 .padding(innerPadding)
         ) {
 
-            // Intestazione "Tema" con Icona (rimane invariata dal design precedente)
+            // Intestazione "Tema"
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -68,7 +66,6 @@ fun ThemeScreen(
                     color = almaRed,
                     fontSize = 32.sp,
                     fontWeight = FontWeight.Bold
-                    // fontFamily = merriweatherSans // Se hai configurato il font
                 )
 
                 Spacer(modifier = Modifier.weight(1f))

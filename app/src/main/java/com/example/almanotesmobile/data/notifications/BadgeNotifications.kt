@@ -16,9 +16,9 @@ val uploadBadgeDefinitions = listOf(
 )
 
 val downloadBadgeDefinitions = listOf(
-    BadgeDefinition("download_1", "Download Lv.1", "Hai scaricato il tuo primo documento."),
-    BadgeDefinition("download_5", "Download Lv.2", "Hai scaricato 5 documenti."),
-    BadgeDefinition("download_10", "Download Lv.3", "Hai scaricato 10 documenti.")
+    BadgeDefinition("download_1", "Downloader Lv.1", "Hai scaricato il tuo primo documento."),
+    BadgeDefinition("download_5", "Downloader Lv.2", "Hai scaricato 5 documenti."),
+    BadgeDefinition("download_10", "Downloader Lv.3", "Hai scaricato 10 documenti.")
 )
 
 val reviewBadgeDefinitions = listOf(

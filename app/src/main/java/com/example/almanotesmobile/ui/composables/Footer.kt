@@ -3,10 +3,6 @@ package com.example.almanotesmobile.ui.composables
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -76,7 +72,7 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 4. PREFERITI / RECENSIONI (Target: ReviewsScreen)
+        // 4. RECENSIONI
         NavigationBarItem(
             icon = {
                 Icon(

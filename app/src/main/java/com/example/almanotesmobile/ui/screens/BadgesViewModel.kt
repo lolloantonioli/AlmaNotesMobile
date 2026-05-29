@@ -2,7 +2,6 @@ package com.example.almanotesmobile.ui.screens
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.almanotesmobile.data.local.Note
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi

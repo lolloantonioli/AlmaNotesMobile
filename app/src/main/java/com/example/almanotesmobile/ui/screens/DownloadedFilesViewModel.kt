@@ -6,13 +6,11 @@ import com.example.almanotesmobile.data.local.Note
 import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
-import androidx.lifecycle.viewModelScope
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class DownloadedFilesViewModel(
