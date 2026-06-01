@@ -72,4 +72,5 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.coil.compose)
+    implementation(libs.play.services.auth)
 }

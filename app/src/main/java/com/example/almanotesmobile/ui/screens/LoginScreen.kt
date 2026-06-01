@@ -2,6 +2,8 @@ package com.example.almanotesmobile.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
@@ -27,6 +29,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 
 // Funzione helper per trovare la FragmentActivity nel contesto di Compose
 fun Context.findFragmentActivity(): FragmentActivity? {
@@ -51,6 +55,29 @@ fun LoginScreen(
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    val googleSignInClient = remember(context) { buildGoogleSignInClient(context) }
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val accountId = account.id ?: account.email
+            if (accountId.isNullOrBlank()) {
+                errorMessage = "Account Google senza identificativo valido"
+            } else {
+                viewModel.signInWithGoogle(
+                    googleId = accountId,
+                    displayName = account.displayName,
+                    email = account.email,
+                    photoUrl = account.photoUrl?.toString(),
+                    onResult = onLoginSuccess
+                )
+            }
+        } catch (exception: ApiException) {
+            errorMessage = exception.toGoogleSignInMessage()
+        }
+    }
 
     val almaRed = Color(0xFFBB2E29)
     val cardBg  = Color(0xFFFAFAFA)
@@ -189,6 +216,16 @@ fun LoginScreen(
                 ) {
                     Text("Accedi", color = Color.White)
                 }
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                GoogleSignInButton(
+                    text = "Accedi con Google",
+                    onClick = {
+                        errorMessage = null
+                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
+                    }
+                )
 
                 if (biometricAvailable && biometricEnabled) {
                     Spacer(modifier = Modifier.height(12.dp))

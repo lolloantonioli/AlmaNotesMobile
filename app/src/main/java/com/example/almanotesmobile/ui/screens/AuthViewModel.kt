@@ -41,7 +41,13 @@ class AuthViewModel(
         viewModelScope.launch { repository.saveRegistration(username, email, password) }
     }
 
-
+    fun signInWithGoogle(googleId: String, displayName: String?, email: String?, photoUrl: String?, onResult: () -> Unit) {
+        viewModelScope.launch {
+            repository.signInWithGoogle(googleId, displayName, email, photoUrl)
+            repository.setBiometricEnabled(true)
+            onResult()
+        }
+    }
     fun updateProfileImage(uri: String) {
         viewModelScope.launch {
             repository.updateProfileImage(uri)

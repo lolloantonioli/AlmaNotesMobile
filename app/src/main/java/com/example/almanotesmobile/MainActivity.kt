@@ -103,6 +103,11 @@ class MainActivity : FragmentActivity() {
                                         popUpTo(Route.Registration) { inclusive = true }
                                     }
                                 },
+                                onGoogleSignInSuccess = {
+                                    navController.navigate(Route.Home) {
+                                        popUpTo(0) { inclusive = true }
+                                    }
+                                },
                                 onNavigateToLogin = { navController.navigate(Route.Login) },
                                 viewModel = authViewModel
                             )
