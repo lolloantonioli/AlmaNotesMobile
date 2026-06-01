@@ -31,6 +31,7 @@ fun buildGoogleSignInClient(context: Context): GoogleSignInClient {
     val webClientId = context.getString(R.string.google_web_client_id)
     val builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
         .requestEmail()
+        .requestProfile()
 
     if (webClientId.isNotBlank()) {
         builder.requestIdToken(webClientId)
