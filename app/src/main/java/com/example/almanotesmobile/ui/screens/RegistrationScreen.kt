@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.launch
 
 @Composable
 fun RegistrationScreen(
@@ -40,27 +41,23 @@ fun RegistrationScreen(
     val cardBg = Color(0xFFFAFAFA)
 
     val context = LocalContext.current
-    val googleSignInClient = remember(context) { buildGoogleSignInClient(context) }
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            val accountId = account.id ?: account.email
-            if (accountId.isNullOrBlank()) {
-                errorMessage = "Account Google senza identificativo valido"
-            } else {
-                viewModel.signInWithGoogle(
-                    googleId = accountId,
-                    displayName = account.displayName,
-                    email = account.email,
-                    photoUrl = account.photoUrl?.toString(),
-                    onResult = onGoogleSignInSuccess
-                )
+    val coroutineScope = rememberCoroutineScope()
+
+    fun launchGoogleSignIn() {
+        errorMessage = null
+        coroutineScope.launch {
+            when (val result = requestGoogleCredential(context)) {
+                is GoogleCredentialManagerResult.Success -> {
+                    viewModel.signInWithGoogle(
+                        googleId = result.googleId,
+                        displayName = result.displayName,
+                        email = result.email,
+                        photoUrl = result.photoUrl,
+                        onResult = onGoogleSignInSuccess
+                    )
+                }
+                is GoogleCredentialManagerResult.Error -> errorMessage = result.message
             }
-        } catch (exception: ApiException) {
-            errorMessage = exception.toGoogleSignInMessage()
         }
     }
 
@@ -185,10 +182,7 @@ fun RegistrationScreen(
 
                 GoogleSignInButton(
                     text = "Registrati con Google",
-                    onClick = {
-                        errorMessage = null
-                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
-                    }
+                    onClick = { launchGoogleSignIn() }
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))

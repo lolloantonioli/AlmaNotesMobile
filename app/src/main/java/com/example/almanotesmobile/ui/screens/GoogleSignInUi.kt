@@ -20,31 +20,72 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.credentials.CredentialManager
+import androidx.credentials.CustomCredential
+import androidx.credentials.GetCredentialRequest
+import androidx.credentials.exceptions.GetCredentialCancellationException
+import androidx.credentials.exceptions.GetCredentialException
+import androidx.credentials.exceptions.NoCredentialException
 import com.example.almanotesmobile.R
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
-import com.google.android.gms.common.api.CommonStatusCodes
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
+import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
+import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
 
-fun buildGoogleSignInClient(context: Context): GoogleSignInClient {
-    val webClientId = context.getString(R.string.google_web_client_id)
-    val builder = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-        .requestEmail()
-        .requestProfile()
+sealed interface GoogleCredentialManagerResult {
+    data class Success(
+        val googleId: String,
+        val displayName: String?,
+        val email: String?,
+        val photoUrl: String?
+    ) : GoogleCredentialManagerResult
 
-    if (webClientId.isNotBlank()) {
-        builder.requestIdToken(webClientId)
-    }
-
-    return GoogleSignIn.getClient(context, builder.build())
+    data class Error(val message: String) : GoogleCredentialManagerResult
 }
 
-fun ApiException.toGoogleSignInMessage(): String = when (statusCode) {
-    CommonStatusCodes.CANCELED -> "Accesso Google annullato"
-    CommonStatusCodes.NETWORK_ERROR -> "Errore di rete durante l'accesso Google"
-    CommonStatusCodes.DEVELOPER_ERROR -> "Configurazione Google non valida: controlla client ID, package name e SHA-1"
-    else -> "Accesso Google non riuscito (codice $statusCode)"
+suspend fun requestGoogleCredential(context: Context): GoogleCredentialManagerResult {
+    val webClientId = context.getString(R.string.google_web_client_id)
+    if (webClientId.isBlank()) {
+        return GoogleCredentialManagerResult.Error(
+            "Configura google_web_client_id con il client ID OAuth 2.0 di tipo Web"
+        )
+    }
+
+    val credentialManager = CredentialManager.create(context)
+    val googleOption = GetSignInWithGoogleOption.Builder(serverClientId = webClientId).build()
+    val request = GetCredentialRequest.Builder()
+        .addCredentialOption(googleOption)
+        .build()
+
+    return try {
+        val result = credentialManager.getCredential(
+            context = context,
+            request = request
+        )
+        val credential = result.credential
+        if (credential is CustomCredential &&
+            credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
+        ) {
+            val googleCredential = GoogleIdTokenCredential.createFrom(credential.data)
+            GoogleCredentialManagerResult.Success(
+                googleId = googleCredential.uniqueId,
+                displayName = googleCredential.displayName,
+                email = googleCredential.email,
+                photoUrl = googleCredential.profilePictureUri?.toString()
+            )
+        } else {
+            GoogleCredentialManagerResult.Error("Credenziale Google non riconosciuta")
+        }
+    } catch (exception: GoogleIdTokenParsingException) {
+        GoogleCredentialManagerResult.Error("Token Google non valido: aggiorna la libreria Google Identity")
+    } catch (exception: GetCredentialCancellationException) {
+        GoogleCredentialManagerResult.Error("Accesso Google annullato")
+    } catch (exception: NoCredentialException) {
+        GoogleCredentialManagerResult.Error("Nessun account Google disponibile sul dispositivo")
+    } catch (exception: GetCredentialException) {
+        GoogleCredentialManagerResult.Error(
+            exception.message ?: "Accesso Google non riuscito con Credential Manager"
+        )
+    }
 }
 
 @Composable

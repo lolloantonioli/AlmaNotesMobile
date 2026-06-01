@@ -31,6 +31,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.common.api.ApiException
+import kotlinx.coroutines.launch
 
 // Funzione helper per trovare la FragmentActivity nel contesto di Compose
 fun Context.findFragmentActivity(): FragmentActivity? {
@@ -55,27 +56,24 @@ fun LoginScreen(
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
-    val googleSignInClient = remember(context) { buildGoogleSignInClient(context) }
-    val googleSignInLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            val accountId = account.id ?: account.email
-            if (accountId.isNullOrBlank()) {
-                errorMessage = "Account Google senza identificativo valido"
-            } else {
-                viewModel.signInWithGoogle(
-                    googleId = accountId,
-                    displayName = account.displayName,
-                    email = account.email,
-                    photoUrl = account.photoUrl?.toString(),
-                    onResult = onLoginSuccess
-                )
+    val coroutineScope = rememberCoroutineScope()
+
+    fun launchGoogleSignIn() {
+        errorMessage = null
+        coroutineScope.launch {
+            when (val result = requestGoogleCredential(context)) {
+                is GoogleCredentialManagerResult.Success -> {
+                    viewModel.signInWithGoogle(
+                        googleId = result.googleId,
+                        displayName = result.displayName,
+                        email = result.email,
+                        photoUrl = result.photoUrl,
+                        onResult = onLoginSuccess
+                    )
+                }
+
+                is GoogleCredentialManagerResult.Error -> errorMessage = result.message
             }
-        } catch (exception: ApiException) {
-            errorMessage = exception.toGoogleSignInMessage()
         }
     }
 
@@ -221,10 +219,7 @@ fun LoginScreen(
 
                 GoogleSignInButton(
                     text = "Accedi con Google",
-                    onClick = {
-                        errorMessage = null
-                        googleSignInLauncher.launch(googleSignInClient.signInIntent)
-                    }
+                    onClick = { launchGoogleSignIn() }
                 )
 
                 if (biometricAvailable && biometricEnabled) {
