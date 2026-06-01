@@ -112,7 +112,7 @@ fun ReviewNoteItem(note: Note, onClick: () -> Unit) {
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text(text = "${Icons.Filled.AllInbox} ${note.downloadCount} download", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(text = "${note.downloadCount} download", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(text = "Il: ${note.uploadedAt.toFormattedDate()}", fontSize = 12.sp, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }

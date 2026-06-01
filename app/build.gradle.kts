@@ -72,7 +72,4 @@ dependencies {
     ksp(libs.androidx.room.compiler)
     implementation("androidx.compose.material:material-icons-extended")
     implementation(libs.coil.compose)
-    implementation(libs.androidx.credentials)
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.googleid)
 }
