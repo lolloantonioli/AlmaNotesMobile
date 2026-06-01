@@ -49,8 +49,10 @@ fun LoginScreen(
     var email          by remember { mutableStateOf("") }
     var password       by remember { mutableStateOf("") }
     var errorMessage   by remember { mutableStateOf<String?>(null) }
+    var showBiometricConsentDialog by remember { mutableStateOf(false) }
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
+    val biometricConsentAsked by viewModel.biometricConsentAsked.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val almaRed = Color(0xFFBB2E29)
@@ -60,6 +62,20 @@ fun LoginScreen(
         val bm = BiometricManager.from(context)
         bm.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
                 BiometricManager.BIOMETRIC_SUCCESS
+    }
+
+    fun completeLoginAfterBiometricConsent(enabled: Boolean) {
+        viewModel.setBiometricEnabled(enabled)
+        showBiometricConsentDialog = false
+        onLoginSuccess()
+    }
+
+    fun handlePasswordLoginSuccess() {
+        if (biometricAvailable && !biometricConsentAsked) {
+            showBiometricConsentDialog = true
+        } else {
+            onLoginSuccess()
+        }
     }
 
     fun launchBiometric() {
@@ -103,6 +119,24 @@ fun LoginScreen(
             .build()
 
         prompt.authenticate(promptInfo)
+    }
+
+    if (showBiometricConsentDialog) {
+        AlertDialog(
+            onDismissRequest = { completeLoginAfterBiometricConsent(false) },
+            title = { Text("Consenso biometria") },
+            text = { Text("Vuoi usare impronta, volto o PIN del dispositivo per accedere più velocemente ad AlmaNotes?") },
+            confirmButton = {
+                TextButton(onClick = { completeLoginAfterBiometricConsent(true) }) {
+                    Text("Sì, abilita")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { completeLoginAfterBiometricConsent(false) }) {
+                    Text("No, grazie")
+                }
+            }
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -181,7 +215,7 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         viewModel.login(email, password) { success ->
-                            if (success) onLoginSuccess()
+                            if (success) handlePasswordLoginSuccess()
                             else errorMessage = "Email o password errati"
                         }
                     },

@@ -25,6 +25,9 @@ class AuthViewModel(
     val biometricEnabled: StateFlow<Boolean> = repository.biometricEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val biometricConsentAsked: StateFlow<Boolean> = repository.biometricConsentAsked
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+
     val username: StateFlow<String> = repository.username
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 
@@ -50,7 +53,6 @@ class AuthViewModel(
     fun login(email: String, password: String, onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val success = repository.login(email, password)
-            if (success) repository.setBiometricEnabled(true) // abilita biometria al primo login
             onResult(success)
         }
     }
@@ -61,6 +63,10 @@ class AuthViewModel(
             val success = repository.loginWithBiometric()
             onResult(success)
         }
+    }
+
+    fun setBiometricEnabled(enabled: Boolean) {
+        viewModelScope.launch { repository.setBiometricEnabled(enabled) }
     }
 
     fun logout() {

@@ -18,6 +18,7 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         val IS_REGISTERED     = booleanPreferencesKey("is_registered")
         val IS_LOGGED_IN      = booleanPreferencesKey("is_logged_in")
         val BIOMETRIC_ENABLED = booleanPreferencesKey("biometric_enabled")
+        val BIOMETRIC_CONSENT_ASKED = booleanPreferencesKey("biometric_consent_asked")
         val REGISTERED_ACCOUNTS = stringSetPreferencesKey("registered_accounts")
         val AWARDED_BADGES    = stringSetPreferencesKey("awarded_badges")
 
@@ -28,7 +29,7 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
     }
     val isLoggedIn: Flow<Boolean> = dataStore.data.map { it[Keys.IS_LOGGED_IN] ?: false }
     val biometricEnabled: Flow<Boolean> = dataStore.data.map { it[Keys.BIOMETRIC_ENABLED] ?: false }
-
+    val biometricConsentAsked: Flow<Boolean> = dataStore.data.map { it[Keys.BIOMETRIC_CONSENT_ASKED] ?: false }
     val username: Flow<String> = dataStore.data.map { it[Keys.USERNAME] ?: "" }
     val email: Flow<String> = dataStore.data.map { it[Keys.EMAIL] ?: "" }
     val password: Flow<String> = dataStore.data.map { it[Keys.PASSWORD] ?: "" }
@@ -152,7 +153,10 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
         }
 
         suspend fun setBiometricEnabled(enabled: Boolean) {
-            dataStore.edit { it[Keys.BIOMETRIC_ENABLED] = enabled }
+            dataStore.edit { prefs ->
+                prefs[Keys.BIOMETRIC_ENABLED] = enabled
+                prefs[Keys.BIOMETRIC_CONSENT_ASKED] = true
+            }
         }
 
         suspend fun loginWithBiometric(): Boolean {
