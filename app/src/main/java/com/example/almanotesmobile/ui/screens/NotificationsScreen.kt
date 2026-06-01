@@ -20,6 +20,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.data.notifications.AppNotification
+import com.example.almanotesmobile.ui.viewmodel.NotificationsViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.ui.viewmodel.DownloadedFilesViewModel
 import org.koin.androidx.compose.koinViewModel
 
 @Composable

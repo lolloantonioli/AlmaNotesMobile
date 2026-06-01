@@ -27,6 +27,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
+import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 
 // Funzione helper per trovare la FragmentActivity nel contesto di Compose
 fun Context.findFragmentActivity(): FragmentActivity? {

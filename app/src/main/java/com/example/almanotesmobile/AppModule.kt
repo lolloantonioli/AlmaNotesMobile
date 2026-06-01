@@ -9,7 +9,18 @@ import com.example.almanotesmobile.data.repositories.AuthRepository
 import com.example.almanotesmobile.data.repositories.NoteRepository
 import com.example.almanotesmobile.data.repositories.NotificationRepository
 import com.example.almanotesmobile.data.repositories.ThemeRepository
-import com.example.almanotesmobile.ui.screens.*
+import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
+import com.example.almanotesmobile.ui.viewmodel.BadgesViewModel
+import com.example.almanotesmobile.ui.viewmodel.DownloadedFilesViewModel
+import com.example.almanotesmobile.ui.viewmodel.HomeViewModel
+import com.example.almanotesmobile.ui.viewmodel.NotificationsViewModel
+import com.example.almanotesmobile.ui.viewmodel.PdfViewerViewModel
+import com.example.almanotesmobile.ui.viewmodel.ProfileViewModel
+import com.example.almanotesmobile.ui.viewmodel.ReviewsViewModel
+import com.example.almanotesmobile.ui.viewmodel.SearchViewModel
+import com.example.almanotesmobile.ui.viewmodel.ThemeViewModel
+import com.example.almanotesmobile.ui.viewmodel.UploadViewModel
+import com.example.almanotesmobile.ui.viewmodel.UploadedFilesViewModel
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 

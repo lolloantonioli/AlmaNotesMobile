@@ -25,6 +25,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.almanotesmobile.ui.viewmodel.PdfViewerState
+import com.example.almanotesmobile.ui.viewmodel.PdfViewerViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 

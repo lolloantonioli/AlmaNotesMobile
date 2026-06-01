@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.data.Theme
 import com.example.almanotesmobile.ui.composables.RadioListItem
+import com.example.almanotesmobile.ui.viewmodel.ThemeActions
+import com.example.almanotesmobile.ui.viewmodel.ThemeState
 
 @Composable
 fun ThemeScreen(

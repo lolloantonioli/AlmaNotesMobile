@@ -1,9 +1,9 @@
 package com.example.almanotesmobile.data.notifications
 
 data class AppNotification(
-                           val id: Long,
-                           val title: String,
-                           val message: String,
-                           val createdAt: Long = System.currentTimeMillis(),
-                           val isPushNotification: Boolean = false
+   val id: Long,
+   val title: String,
+   val message: String,
+   val createdAt: Long = System.currentTimeMillis(),
+   val isPushNotification: Boolean = false
 )

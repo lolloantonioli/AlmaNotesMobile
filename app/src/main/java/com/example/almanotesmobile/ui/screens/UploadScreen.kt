@@ -25,6 +25,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material3.Text
+import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
+import com.example.almanotesmobile.ui.viewmodel.UploadViewModel
 
 
 @Composable

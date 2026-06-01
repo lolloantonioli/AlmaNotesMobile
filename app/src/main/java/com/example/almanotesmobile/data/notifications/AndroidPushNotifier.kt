@@ -21,8 +21,6 @@ private const val PUSH_CHANNEL_DESCRIPTION = "Notifiche per badge, recensioni e 
 class AndroidPushNotifier(private val context: Context) {
 
     fun createNotificationChannels() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
-
         val channel = NotificationChannel(
             PUSH_CHANNEL_ID,
             PUSH_CHANNEL_NAME,

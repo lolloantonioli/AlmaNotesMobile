@@ -18,6 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
+import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 
 @Composable
 fun RegistrationScreen(

@@ -37,6 +37,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.example.almanotesmobile.ui.viewmodel.BadgesViewModel
 import org.koin.androidx.compose.koinViewModel
 
 data class BadgeUi(val title: String, val subtitle: String, val icon: ImageVector, val achieved: Boolean)

@@ -39,6 +39,8 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
+import com.example.almanotesmobile.ui.viewmodel.ProfileViewModel
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
@@ -81,7 +83,7 @@ private fun achievementText(points: Long): String {
 
 @Composable
 fun ProfileScreen(
-    authViewModel:  AuthViewModel,
+    authViewModel: AuthViewModel,
     onOpenNote:     (Long) -> Unit,
     onShowUploadedNotes: () -> Unit,
     onShowDownloadedNotes: () -> Unit,

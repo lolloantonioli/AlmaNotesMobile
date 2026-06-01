@@ -1,4 +1,4 @@
-package com.example.almanotesmobile.ui.screens
+package com.example.almanotesmobile.ui.viewmodel
 
 import android.content.Context
 import android.net.Uri

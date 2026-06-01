@@ -1,4 +1,4 @@
-package com.example.almanotesmobile.ui.screens
+package com.example.almanotesmobile.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -13,16 +13,15 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.stateIn
 
 @OptIn(ExperimentalCoroutinesApi::class)
-class DownloadedFilesViewModel(
+class UploadedFilesViewModel(
     private val noteRepository: NoteRepository,
-    authRepository: AuthRepository
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
-    val downloadedNotes: StateFlow<List<Note>> = authRepository.downloadedNoteIds
-        .flatMapLatest { ids ->
-            if (ids.isEmpty()) flowOf(emptyList())
-            else noteRepository.getNotesByIds(ids)
+    val uploadedNotes: StateFlow<List<Note>> = authRepository.username
+        .flatMapLatest { username ->
+            if (username.isBlank()) flowOf(emptyList())
+            else noteRepository.getNotesByUploader(username)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
 }

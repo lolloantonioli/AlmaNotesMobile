@@ -28,6 +28,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
+import com.example.almanotesmobile.ui.viewmodel.ThemeViewModel
 
 class MainActivity : FragmentActivity() {
     private val notificationPermissionLauncher = registerForActivityResult(
