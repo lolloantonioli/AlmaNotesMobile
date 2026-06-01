@@ -82,34 +82,6 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
             prefs[Keys.IS_LOGGED_IN] = true
         }
     }
-
-    suspend fun signInWithGoogle(googleId: String, displayName: String?, email: String?, photoUrl: String?) {
-        dataStore.edit { prefs ->
-            val fallbackAccountId = "google_$googleId"
-            val accountId = sanitizeAccountId(email.orEmpty().ifBlank { fallbackAccountId })
-            val username = displayName.orEmpty().ifBlank {
-                email.orEmpty().substringBefore('@').ifBlank { "Utente Google" }
-            }
-            val accountEmail = email.orEmpty().ifBlank { "$accountId@google.almanotes" }
-
-            prefs[Keys.REGISTERED_ACCOUNTS] = prefs[Keys.REGISTERED_ACCOUNTS]
-                .orEmpty()
-                .toMutableSet()
-                .apply { add(accountId) }
-            prefs[accountUsernameKey(accountId)] = username
-            prefs[accountEmailKey(accountId)] = accountEmail
-            prefs[accountPasswordKey(accountId)] = ""
-            prefs[Keys.USERNAME] = username
-            prefs[Keys.EMAIL] = accountEmail
-            prefs[Keys.PASSWORD] = ""
-            prefs[Keys.IS_REGISTERED] = true
-            prefs[Keys.IS_LOGGED_IN] = true
-
-            if (!photoUrl.isNullOrBlank()) {
-                prefs[stringPreferencesKey("profile_image_uri_$accountId")] = photoUrl
-            }
-        }
-    }
     suspend fun updateProfileImage(uri: String) {
         dataStore.edit { prefs ->
             val accountKey = prefs.currentProfileImageKey()

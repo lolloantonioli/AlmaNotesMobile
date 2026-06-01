@@ -1,5 +1,3 @@
 <resources>
     <string name="app_name">AlmaNotesMobile</string>
-    <!-- Inserisci qui il client ID OAuth 2.0 di tipo Web se vuoi ricevere un ID token da Google. -->
-    <string name="google_web_client_id" translatable="false">434708228713-peuqih6fhbslsc7urmekvh2dnbpt2jes.apps.googleusercontent.com</string>
 </resources>

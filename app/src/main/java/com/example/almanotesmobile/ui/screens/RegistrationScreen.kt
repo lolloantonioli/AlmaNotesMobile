@@ -1,7 +1,5 @@
 package com.example.almanotesmobile.ui.screens
 
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,7 +10,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -21,14 +18,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.almanotesmobile.R
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
-import kotlinx.coroutines.launch
 
 @Composable
 fun RegistrationScreen(
     onRegisterSuccess: () -> Unit,
-    onGoogleSignInSuccess: () -> Unit,
     onNavigateToLogin: () -> Unit,
     viewModel: AuthViewModel
 ) {
@@ -39,27 +32,6 @@ fun RegistrationScreen(
 
     val almaRed = Color(0xFFBB2E29)
     val cardBg = Color(0xFFFAFAFA)
-
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
-
-    fun launchGoogleSignIn() {
-        errorMessage = null
-        coroutineScope.launch {
-            when (val result = requestGoogleCredential(context)) {
-                is GoogleCredentialManagerResult.Success -> {
-                    viewModel.signInWithGoogle(
-                        googleId = result.googleId,
-                        displayName = result.displayName,
-                        email = result.email,
-                        photoUrl = result.photoUrl,
-                        onResult = onGoogleSignInSuccess
-                    )
-                }
-                is GoogleCredentialManagerResult.Error -> errorMessage = result.message
-            }
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // 1. Immagine di Sfondo
@@ -179,13 +151,6 @@ fun RegistrationScreen(
                 }
 
                 Spacer(modifier = Modifier.height(16.dp))
-
-                GoogleSignInButton(
-                    text = "Registrati con Google",
-                    onClick = { launchGoogleSignIn() }
-                )
-
-                Spacer(modifier = Modifier.height(12.dp))
 
                 // Bottone Registrati
                 Button(
