@@ -64,24 +64,17 @@ fun LoginScreen(
                 BiometricManager.BIOMETRIC_SUCCESS
     }
 
-    fun completeLoginAfterBiometricConsent(enabled: Boolean) {
-        viewModel.setBiometricEnabled(enabled)
-        showBiometricConsentDialog = false
-        onLoginSuccess()
-    }
-
-    fun handlePasswordLoginSuccess() {
-        if (biometricAvailable && !biometricConsentAsked) {
-            showBiometricConsentDialog = true
-        } else {
-            onLoginSuccess()
-        }
-    }
-
-    fun launchBiometric() {
+    fun launchBiometric(
+        title: String,
+        subtitle: String,
+        onAuthenticated: () -> Unit,
+        onCanceled: () -> Unit = {},
+        onFailed: () -> Unit = { errorMessage = "Autenticazione fallita" }
+    ) {
         val activity = context.findFragmentActivity()
         if (activity == null) {
             errorMessage = "Errore: Impossibile avviare la biometria"
+            onCanceled()
             return
         }
 
@@ -92,51 +85,56 @@ fun LoginScreen(
             executor,
             object : BiometricPrompt.AuthenticationCallback() {
                 override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-                    viewModel.loginWithBiometric { success ->
-                        if (success) onLoginSuccess()
-                        else errorMessage = "Utente non trovato"
-                    }
+                    onAuthenticated()
                 }
 
                 override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-                    if (errorCode != BiometricPrompt.ERROR_USER_CANCELED &&
-                        errorCode != BiometricPrompt.ERROR_NEGATIVE_BUTTON
+                    if (errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
+                        errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
                     ) {
+                        onCanceled()
+                    }
+                    else {
                         errorMessage = "Errore biometrico: $errString"
+                        onCanceled()
                     }
                 }
 
                 override fun onAuthenticationFailed() {
-                    errorMessage = "Autenticazione fallita"
+                    onFailed()
                 }
             }
         )
 
         val promptInfo = BiometricPrompt.PromptInfo.Builder()
-            .setTitle("Accedi ad AlmaNotes")
-            .setSubtitle("Usa l'impronta o il PIN del dispositivo")
+            .setTitle(title)
+            .setSubtitle(subtitle)
             .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
             .build()
 
         prompt.authenticate(promptInfo)
     }
 
-    if (showBiometricConsentDialog) {
-        AlertDialog(
-            onDismissRequest = { completeLoginAfterBiometricConsent(false) },
-            title = { Text("Consenso biometria") },
-            text = { Text("Vuoi usare impronta, volto o PIN del dispositivo per accedere più velocemente ad AlmaNotes?") },
-            confirmButton = {
-                TextButton(onClick = { completeLoginAfterBiometricConsent(true) }) {
-                    Text("Sì, abilita")
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { completeLoginAfterBiometricConsent(false) }) {
-                    Text("No, grazie")
-                }
-            }
+    fun completeLoginAfterBiometricConsent(enabled: Boolean) {
+        viewModel.setBiometricEnabled(enabled)
+        onLoginSuccess()
+    }
+
+    fun requestBiometricConsent() {
+        launchBiometric(
+            title = "Abilita accesso biometrico",
+            subtitle = "Conferma con impronta, volto o PIN del dispositivo",
+            onAuthenticated = { completeLoginAfterBiometricConsent(true) },
+            onCanceled = { completeLoginAfterBiometricConsent(false) }
         )
+    }
+
+    fun handlePasswordLoginSuccess() {
+        if (biometricAvailable && !biometricConsentAsked) {
+            requestBiometricConsent()
+        } else {
+            onLoginSuccess()
+        }
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -230,7 +228,18 @@ fun LoginScreen(
                 if (biometricAvailable && biometricEnabled) {
                     Spacer(modifier = Modifier.height(12.dp))
                     Button(
-                        onClick = { launchBiometric() },
+                        onClick = {
+                            launchBiometric(
+                                title = "Accedi ad AlmaNotes",
+                                subtitle = "Usa l'impronta o il PIN del dispositivo",
+                                onAuthenticated = {
+                                    viewModel.loginWithBiometric { success ->
+                                        if (success) onLoginSuccess()
+                                        else errorMessage = "Utente non trovato"
+                                    }
+                                }
+                            )
+                        },
                         colors = ButtonDefaults.buttonColors(containerColor = almaRed.copy(alpha = 0.8f)),
                         modifier = Modifier.fillMaxWidth().height(45.dp)
                     ) {
