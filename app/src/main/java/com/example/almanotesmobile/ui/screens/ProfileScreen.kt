@@ -1,8 +1,10 @@
 package com.example.almanotesmobile.ui.screens
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.provider.Settings
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -39,8 +41,13 @@ import androidx.core.content.FileProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.example.almanotesmobile.data.local.Note
+import com.example.almanotesmobile.ui.permissions.PermissionDeniedAlert
+import com.example.almanotesmobile.ui.permissions.PermissionPermanentlyDeniedSnackbar
 import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 import com.example.almanotesmobile.ui.viewmodel.ProfileViewModel
+import com.example.almanotesmobile.utils.PermissionStatus
+import com.example.almanotesmobile.utils.rememberMultiplePermissions
+import com.example.almanotesmobile.utils.requiredImageReadPermissions
 import com.example.almanotesmobile.utils.saveImageToInternalStorage
 import org.koin.androidx.compose.koinViewModel
 import java.io.File
@@ -109,10 +116,40 @@ fun ProfileScreen(
 
     var selectedNote          by remember { mutableStateOf<Note?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
+    var showGalleryPermissionDeniedAlert by remember { mutableStateOf(false) }
+    var showGalleryPermissionPermanentlyDeniedSnackbar by remember { mutableStateOf(false) }
+    val permissionSnackbarHostState = remember { SnackbarHostState() }
 
-    // Camera
+    // Camera e galleria
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { saveImageToInternalStorage(context, it)?.let { p -> authViewModel.updateProfileImage(p) } }
+    }
+    val imageReadPermissions = remember { requiredImageReadPermissions() }
+    val imagePermissionHandler = rememberMultiplePermissions(imageReadPermissions) { statuses ->
+        when {
+            statuses.all { it.value == PermissionStatus.Granted } ->
+                galleryLauncher.launch("image/*")
+            statuses.all { it.value == PermissionStatus.PermanentlyDenied } ->
+                showGalleryPermissionPermanentlyDeniedSnackbar = true
+            else ->
+                showGalleryPermissionDeniedAlert = true
+        }
+    }
+    fun openGalleryOrRequestPermission() {
+        if (imagePermissionHandler.statuses.all { it.value.isGranted }) {
+            galleryLauncher.launch("image/*")
+        } else {
+            imagePermissionHandler.launchPermissionRequest()
+        }
+    }
+    fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        }
     }
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
@@ -311,7 +348,7 @@ fun ProfileScreen(
             title = { Text("Foto Profilo", fontWeight = FontWeight.Bold) },
             text  = { Text("Scegli come inserire la tua foto:") },
             confirmButton = {
-                Button(onClick = { showImageSourceDialog = false; galleryLauncher.launch("image/*") },
+                Button(onClick = { showImageSourceDialog = false; openGalleryOrRequestPermission() },
                     colors = ButtonDefaults.buttonColors(almaRed)) { Text("Galleria") }
             },
             dismissButton = {
@@ -321,6 +358,28 @@ fun ProfileScreen(
             }
         )
     }
+
+    SnackbarHost(
+        hostState = permissionSnackbarHostState,
+        modifier = Modifier.fillMaxWidth()
+    )
+
+    PermissionDeniedAlert(
+        show = showGalleryPermissionDeniedAlert,
+        title = "Permesso galleria negato",
+        message = "Il permesso di accesso alle immagini è necessario per scegliere una foto profilo dalla galleria.",
+        onAction = imagePermissionHandler::launchPermissionRequest,
+        onHide = { showGalleryPermissionDeniedAlert = false }
+    )
+
+    PermissionPermanentlyDeniedSnackbar(
+        snackbarHostState = permissionSnackbarHostState,
+        show = showGalleryPermissionPermanentlyDeniedSnackbar,
+        message = "Permesso immagini richiesto per scegliere la foto profilo.",
+        onAction = ::openAppSettings,
+        onHide = { showGalleryPermissionPermanentlyDeniedSnackbar = false }
+    )
+
 }
 
 // Section header

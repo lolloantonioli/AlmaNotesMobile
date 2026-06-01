@@ -1,6 +1,8 @@
 package com.example.almanotesmobile.ui.screens
 
+import android.content.Intent
 import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,8 +27,13 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material3.Text
+import com.example.almanotesmobile.ui.permissions.PermissionDeniedAlert
+import com.example.almanotesmobile.ui.permissions.PermissionPermanentlyDeniedSnackbar
 import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 import com.example.almanotesmobile.ui.viewmodel.UploadViewModel
+import com.example.almanotesmobile.utils.PermissionStatus
+import com.example.almanotesmobile.utils.rememberMultiplePermissions
+import com.example.almanotesmobile.utils.requiredDocumentReadPermissions
 
 
 @Composable
@@ -39,6 +46,8 @@ fun UploadScreen(
     var professor by remember { mutableStateOf("") }
     var degreeCourse by remember { mutableStateOf("") }
     var selectedFileUri by remember { mutableStateOf<Uri?>(null) }
+    var showFilePermissionDeniedAlert by remember { mutableStateOf(false) }
+    var showFilePermissionPermanentlyDeniedSnackbar by remember { mutableStateOf(false) }
 
     val uploaderName by authViewModel.username.collectAsStateWithLifecycle()
 
@@ -46,10 +55,41 @@ fun UploadScreen(
     val cardBg = MaterialTheme.colorScheme.surface
     val borderColor = Color.LightGray.copy(alpha = 0.5f)
     val context = LocalContext.current
+    val fileSnackbarHostState = remember { SnackbarHostState() }
 
     val filePickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> selectedFileUri = uri }
+
+    val documentReadPermissions = remember { requiredDocumentReadPermissions() }
+    val documentPermissionHandler = rememberMultiplePermissions(documentReadPermissions) { statuses ->
+        when {
+            statuses.isEmpty() || statuses.all { it.value == PermissionStatus.Granted } ->
+                filePickerLauncher.launch("application/pdf")
+            statuses.all { it.value == PermissionStatus.PermanentlyDenied } ->
+                showFilePermissionPermanentlyDeniedSnackbar = true
+            else ->
+                showFilePermissionDeniedAlert = true
+        }
+    }
+
+    fun openFilePickerOrRequestPermission() {
+        if (documentReadPermissions.isEmpty() || documentPermissionHandler.statuses.all { it.value.isGranted }) {
+            filePickerLauncher.launch("application/pdf")
+        } else {
+            documentPermissionHandler.launchPermissionRequest()
+        }
+    }
+
+    fun openAppSettings() {
+        val intent = Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS).apply {
+            data = Uri.fromParts("package", context.packageName, null)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        if (intent.resolveActivity(context.packageManager) != null) {
+            context.startActivity(intent)
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -94,7 +134,7 @@ fun UploadScreen(
                     ) {
                         Surface(
                             modifier = Modifier.fillMaxHeight().width(100.dp).border(0.5.dp, borderColor),
-                            onClick = { filePickerLauncher.launch("application/pdf") },
+                            onClick = { openFilePickerOrRequestPermission() },
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -135,6 +175,27 @@ fun UploadScreen(
                 }
             }
         }
+        SnackbarHost(
+            hostState = fileSnackbarHostState,
+            modifier = Modifier.align(Alignment.BottomCenter)
+        )
+
+        PermissionDeniedAlert(
+            show = showFilePermissionDeniedAlert,
+            title = "Permesso file negato",
+            message = "Il permesso di accesso ai file è necessario per selezionare un PDF da caricare.",
+            onAction = documentPermissionHandler::launchPermissionRequest,
+            onHide = { showFilePermissionDeniedAlert = false }
+        )
+
+        PermissionPermanentlyDeniedSnackbar(
+            snackbarHostState = fileSnackbarHostState,
+            show = showFilePermissionPermanentlyDeniedSnackbar,
+            message = "Permesso file richiesto per caricare un PDF.",
+            onAction = ::openAppSettings,
+            onHide = { showFilePermissionPermanentlyDeniedSnackbar = false }
+        )
+
     }
 }
 
