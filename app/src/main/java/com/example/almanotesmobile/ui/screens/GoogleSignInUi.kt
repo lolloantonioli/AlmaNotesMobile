@@ -1,6 +1,7 @@
 package com.example.almanotesmobile.ui.screens
 
 import android.content.Context
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -30,6 +31,8 @@ import com.example.almanotesmobile.R
 import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import com.google.android.libraries.identity.googleid.GoogleIdTokenParsingException
+
+private const val GOOGLE_CREDENTIAL_TAG = "GoogleCredentialAuth"
 
 sealed interface GoogleCredentialManagerResult {
     data class Success(
@@ -76,12 +79,19 @@ suspend fun requestGoogleCredential(context: Context): GoogleCredentialManagerRe
             GoogleCredentialManagerResult.Error("Credenziale Google non riconosciuta")
         }
     } catch (exception: GoogleIdTokenParsingException) {
+        Log.w(GOOGLE_CREDENTIAL_TAG, "Unable to parse Google ID token", exception)
         GoogleCredentialManagerResult.Error("Token Google non valido: aggiorna la libreria Google Identity")
     } catch (exception: GetCredentialCancellationException) {
-        GoogleCredentialManagerResult.Error("Accesso Google annullato")
+        Log.w(GOOGLE_CREDENTIAL_TAG, "Credential Manager did not return Google authorization", exception)
+        GoogleCredentialManagerResult.Error(
+            "Accesso Google non completato: se hai selezionato un account, controlla che " +
+                    "google_web_client_id sia il client ID Web e che package name/SHA-1 siano configurati in Google Cloud."
+        )
     } catch (exception: NoCredentialException) {
+        Log.w(GOOGLE_CREDENTIAL_TAG, "No Google credential available", exception)
         GoogleCredentialManagerResult.Error("Nessun account Google disponibile sul dispositivo")
     } catch (exception: GetCredentialException) {
+        Log.w(GOOGLE_CREDENTIAL_TAG, "Credential Manager Google sign-in failed", exception)
         GoogleCredentialManagerResult.Error(
             exception.message ?: "Accesso Google non riuscito con Credential Manager"
         )
