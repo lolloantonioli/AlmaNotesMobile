@@ -3,7 +3,6 @@ package com.example.almanotesmobile.ui.screens
 import android.Manifest
 import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -111,27 +110,9 @@ fun ProfileScreen(
     var selectedNote          by remember { mutableStateOf<Note?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
 
-    // Camera e galleria
+    // Camera
     val galleryLauncher = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         uri?.let { saveImageToInternalStorage(context, it)?.let { p -> authViewModel.updateProfileImage(p) } }
-    }
-    val imageReadPermission = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            Manifest.permission.READ_MEDIA_IMAGES
-        } else {
-            Manifest.permission.READ_EXTERNAL_STORAGE
-        }
-    }
-    val galleryPermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
-        if (ok) galleryLauncher.launch("image/*")
-        else Toast.makeText(context, "Permesso negato", Toast.LENGTH_SHORT).show()
-    }
-    fun openGalleryOrRequestPermission() {
-        if (ContextCompat.checkSelfPermission(context, imageReadPermission) == PackageManager.PERMISSION_GRANTED) {
-            galleryLauncher.launch("image/*")
-        } else {
-            galleryPermissionLauncher.launch(imageReadPermission)
-        }
     }
     var tempImageUri by remember { mutableStateOf<Uri?>(null) }
     val cameraLauncher = rememberLauncherForActivityResult(ActivityResultContracts.TakePicture()) { ok ->
@@ -330,7 +311,7 @@ fun ProfileScreen(
             title = { Text("Foto Profilo", fontWeight = FontWeight.Bold) },
             text  = { Text("Scegli come inserire la tua foto:") },
             confirmButton = {
-                Button(onClick = { showImageSourceDialog = false; openGalleryOrRequestPermission() },
+                Button(onClick = { showImageSourceDialog = false; galleryLauncher.launch("image/*") },
                     colors = ButtonDefaults.buttonColors(almaRed)) { Text("Galleria") }
             },
             dismissButton = {
@@ -340,7 +321,6 @@ fun ProfileScreen(
             }
         )
     }
-
 }
 
 // Section header
@@ -507,11 +487,26 @@ fun CredentialRow(
     onPasswordVisibilityClick: (() -> Unit)? = null
 ) {
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        Icon(icon, null, tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(18.dp))
+        Icon(
+            icon,
+            null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.size(18.dp)
+        )
         Spacer(Modifier.width(12.dp))
         Column(Modifier.weight(1f)) {
-            Text(label, fontSize = 10.sp, color = MaterialTheme.colorScheme.onSurfaceVariant, fontWeight = FontWeight.Bold)
-            Text(value, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Medium)
+            Text(
+                label,
+                fontSize = 10.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                value,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurface,
+                fontWeight = FontWeight.Medium
+            )
         }
         if (isPassword && onPasswordVisibilityClick != null) {
             IconButton(onClick = onPasswordVisibilityClick, modifier = Modifier.size(32.dp)) {

@@ -1,10 +1,6 @@
 package com.example.almanotesmobile.ui.screens
 
-import android.Manifest
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
-import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,7 +21,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import org.koin.androidx.compose.koinViewModel
@@ -53,21 +48,8 @@ fun UploadScreen(
     val context = LocalContext.current
 
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.OpenDocument()
+        contract = ActivityResultContracts.GetContent()
     ) { uri: Uri? -> selectedFileUri = uri }
-    val filePermissionLauncher = rememberLauncherForActivityResult(ActivityResultContracts.RequestPermission()) { ok ->
-        if (ok) filePickerLauncher.launch(arrayOf("application/pdf"))
-        else Toast.makeText(context, "Permesso negato", Toast.LENGTH_SHORT).show()
-    }
-    fun openFilePickerOrRequestPermission() {
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.S_V2 ||
-            ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
-        ) {
-            filePickerLauncher.launch(arrayOf("application/pdf"))
-        } else {
-            filePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-        }
-    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
@@ -112,7 +94,7 @@ fun UploadScreen(
                     ) {
                         Surface(
                             modifier = Modifier.fillMaxHeight().width(100.dp).border(0.5.dp, borderColor),
-                            onClick = { openFilePickerOrRequestPermission() },
+                            onClick = { filePickerLauncher.launch("application/pdf") },
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -165,7 +147,13 @@ fun InputFieldPlaceholder(
     TextField(
         value = value,
         onValueChange = onValueChange,
-        placeholder = { Text(text = placeholder, fontSize = 14.sp, color = MaterialTheme.colorScheme.onSurfaceVariant) },
+        placeholder = {
+            Text(
+                text = placeholder,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        },
         modifier = Modifier.fillMaxWidth(),
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surface,

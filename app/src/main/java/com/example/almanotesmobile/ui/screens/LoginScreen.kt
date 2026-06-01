@@ -1,32 +1,17 @@
 package com.example.almanotesmobile.ui.screens
 
-import android.os.Build
+import android.content.Context
+import android.content.ContextWrapper
 import androidx.biometric.BiometricManager
 import androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG
 import androidx.biometric.BiometricManager.Authenticators.DEVICE_CREDENTIAL
 import androidx.biometric.BiometricPrompt
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -43,7 +28,16 @@ import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
-import com.example.almanotesmobile.utils.findActivity
+
+// Funzione helper per trovare la FragmentActivity nel contesto di Compose
+fun Context.findFragmentActivity(): FragmentActivity? {
+    var currentContext = this
+    while (currentContext is ContextWrapper) {
+        if (currentContext is FragmentActivity) return currentContext
+        currentContext = currentContext.baseContext
+    }
+    return null
+}
 
 @Composable
 fun LoginScreen(
@@ -52,26 +46,22 @@ fun LoginScreen(
     onBiometricLogin: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    var email by remember { mutableStateOf("") }
-    var password by remember { mutableStateOf("") }
-    var errorMessage by remember { mutableStateOf<String?>(null) }
+    var email          by remember { mutableStateOf("") }
+    var password       by remember { mutableStateOf("") }
+    var errorMessage   by remember { mutableStateOf<String?>(null) }
+    var showBiometricConsentDialog by remember { mutableStateOf(false) }
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
     val biometricConsentAsked by viewModel.biometricConsentAsked.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val almaRed = Color(0xFFBB2E29)
-    val cardBg = Color(0xFFFAFAFA)
+    val cardBg  = Color(0xFFFAFAFA)
 
-    val biometricAuthenticators = remember {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            BIOMETRIC_STRONG or DEVICE_CREDENTIAL
-        } else {
-            BIOMETRIC_STRONG
-        }
-    }
-    val biometricAvailable = remember(context, biometricAuthenticators) {
-        BiometricManager.from(context).canAuthenticate(biometricAuthenticators) == BiometricManager.BIOMETRIC_SUCCESS
+    val biometricAvailable = remember(context) {
+        val bm = BiometricManager.from(context)
+        bm.canAuthenticate(BIOMETRIC_STRONG or DEVICE_CREDENTIAL) ==
+                BiometricManager.BIOMETRIC_SUCCESS
     }
 
     fun launchBiometric(
@@ -81,14 +71,15 @@ fun LoginScreen(
         onCanceled: () -> Unit = {},
         onFailed: () -> Unit = { errorMessage = "Autenticazione fallita" }
     ) {
-        val activity = context.findActivity() as? FragmentActivity
+        val activity = context.findFragmentActivity()
         if (activity == null) {
-            errorMessage = "Errore: impossibile avviare la biometria"
+            errorMessage = "Errore: Impossibile avviare la biometria"
             onCanceled()
             return
         }
 
         val executor = ContextCompat.getMainExecutor(context)
+
         val prompt = BiometricPrompt(
             activity,
             executor,
@@ -102,7 +93,8 @@ fun LoginScreen(
                         errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON
                     ) {
                         onCanceled()
-                    } else {
+                    }
+                    else {
                         errorMessage = "Errore biometrico: $errString"
                         onCanceled()
                     }
@@ -114,16 +106,13 @@ fun LoginScreen(
             }
         )
 
-        val promptInfoBuilder = BiometricPrompt.PromptInfo.Builder()
+        val promptInfo = BiometricPrompt.PromptInfo.Builder()
             .setTitle(title)
             .setSubtitle(subtitle)
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            promptInfoBuilder.setAllowedAuthenticators(biometricAuthenticators)
-        } else {
-            promptInfoBuilder.setNegativeButtonText("Annulla")
-        }
+            .setAllowedAuthenticators(BIOMETRIC_STRONG or DEVICE_CREDENTIAL)
+            .build()
 
-        prompt.authenticate(promptInfoBuilder.build())
+        prompt.authenticate(promptInfo)
     }
 
     fun completeLoginAfterBiometricConsent(enabled: Boolean) {
@@ -173,7 +162,9 @@ fun LoginScreen(
                 )
 
                 Spacer(modifier = Modifier.height(16.dp))
+
                 Text("Accedi", fontSize = 24.sp, fontWeight = FontWeight.Bold, color = almaRed)
+
                 Spacer(modifier = Modifier.height(24.dp))
 
                 OutlinedTextField(
@@ -222,7 +213,8 @@ fun LoginScreen(
                 Button(
                     onClick = {
                         viewModel.login(email, password) { success ->
-                            if (success) handlePasswordLoginSuccess() else errorMessage = "Email o password errati"
+                            if (success) handlePasswordLoginSuccess()
+                            else errorMessage = "Email o password errati"
                         }
                     },
                     colors = ButtonDefaults.buttonColors(containerColor = almaRed),
@@ -231,8 +223,10 @@ fun LoginScreen(
                     Text("Accedi", color = Color.White)
                 }
 
+                Spacer(modifier = Modifier.height(12.dp))
+
                 if (biometricAvailable && biometricEnabled) {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(12.dp))
                     Button(
                         onClick = {
                             launchBiometric(
@@ -240,7 +234,8 @@ fun LoginScreen(
                                 subtitle = "Usa l'impronta o il PIN del dispositivo",
                                 onAuthenticated = {
                                     viewModel.loginWithBiometric { success ->
-                                        if (success) onLoginSuccess() else errorMessage = "Utente non trovato"
+                                        if (success) onLoginSuccess()
+                                        else errorMessage = "Utente non trovato"
                                     }
                                 }
                             )
