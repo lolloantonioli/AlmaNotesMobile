@@ -22,7 +22,11 @@ fun AlmaNotesFooter(navController: NavController) {
     NavigationBar {
         // 1. HOME
         NavigationBarItem(
-            icon = { Icon(Icons.Filled.Home, contentDescription = "Home") },
+            icon = { Icon(
+                painter = painterResource(id = R.drawable.img),
+                contentDescription = "Home",
+                modifier = Modifier.size(24.dp)
+            ) },
             label = { Text("Home") },
             selected = currentDestination?.route?.contains("Home") == true,
             onClick = {
@@ -57,7 +61,7 @@ fun AlmaNotesFooter(navController: NavController) {
         NavigationBarItem(
             icon = {
                 Icon(
-                    painter = painterResource(id = R.drawable.add),
+                    painter = painterResource(id = R.drawable.img_1),
                     contentDescription = "Carica",
                     modifier = Modifier.size(24.dp)
                 )
@@ -76,7 +80,7 @@ fun AlmaNotesFooter(navController: NavController) {
         NavigationBarItem(
             icon = {
                 Icon(
-                    painter = painterResource(id = R.drawable.favourites),
+                    painter = painterResource(id = R.drawable.img_2),
                     contentDescription = "Recensioni",
                     modifier = Modifier.size(24.dp)
                 )

@@ -49,10 +49,8 @@ fun LoginScreen(
     var email          by remember { mutableStateOf("") }
     var password       by remember { mutableStateOf("") }
     var errorMessage   by remember { mutableStateOf<String?>(null) }
-    var showBiometricConsentDialog by remember { mutableStateOf(false) }
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
-    val biometricConsentAsked by viewModel.biometricConsentAsked.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
     val almaRed = Color(0xFFBB2E29)
@@ -115,26 +113,12 @@ fun LoginScreen(
         prompt.authenticate(promptInfo)
     }
 
-    fun completeLoginAfterBiometricConsent(enabled: Boolean) {
-        viewModel.setBiometricEnabled(enabled)
-        onLoginSuccess()
-    }
-
-    fun requestBiometricConsent() {
-        launchBiometric(
-            title = "Abilita accesso biometrico",
-            subtitle = "Conferma con impronta, volto o PIN del dispositivo",
-            onAuthenticated = { completeLoginAfterBiometricConsent(true) },
-            onCanceled = { completeLoginAfterBiometricConsent(false) }
-        )
-    }
 
     fun handlePasswordLoginSuccess() {
-        if (biometricAvailable && !biometricConsentAsked) {
-            requestBiometricConsent()
-        } else {
-            onLoginSuccess()
+        if (biometricAvailable && !biometricEnabled) {
+            viewModel.setBiometricEnabled(true)
         }
+        onLoginSuccess()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {

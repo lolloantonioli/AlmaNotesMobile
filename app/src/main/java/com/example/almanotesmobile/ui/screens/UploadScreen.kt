@@ -1,6 +1,10 @@
 package com.example.almanotesmobile.ui.screens
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
@@ -25,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import org.koin.androidx.compose.koinViewModel
 import androidx.compose.material3.Text
+import androidx.core.content.ContextCompat
 import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 import com.example.almanotesmobile.ui.viewmodel.UploadViewModel
 
@@ -48,9 +53,32 @@ fun UploadScreen(
     val context = LocalContext.current
 
     val filePickerLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.GetContent()
+        contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? -> selectedFileUri = uri }
 
+    val filePermissionLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            filePickerLauncher.launch(arrayOf("application/pdf"))
+        } else {
+            Toast.makeText(context, "Permesso negato", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun launchFilePicker() {
+        // Su Android 13+ (Tiramisu) non serve/non si può chiedere READ_EXTERNAL_STORAGE per i documenti
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            filePickerLauncher.launch(arrayOf("application/pdf"))
+        } else {
+            // Logica in stile fotocamera per Android 12 e inferiori
+            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
+                filePickerLauncher.launch(arrayOf("application/pdf"))
+            } else {
+                filePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
+            }
+        }
+    }
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.sfondo),
@@ -92,9 +120,10 @@ fun UploadScreen(
                         modifier = Modifier.fillMaxWidth().height(45.dp).background(MaterialTheme.colorScheme.surface),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+
                         Surface(
                             modifier = Modifier.fillMaxHeight().width(100.dp).border(0.5.dp, borderColor),
-                            onClick = { filePickerLauncher.launch("application/pdf") },
+                            onClick = { launchFilePicker() },
                             color = MaterialTheme.colorScheme.surfaceVariant
                         ) {
                             Box(contentAlignment = Alignment.Center) {
@@ -110,6 +139,7 @@ fun UploadScreen(
                         )
                     }
                 }
+
 
                 Spacer(Modifier.height(32.dp))
 
@@ -165,3 +195,4 @@ fun InputFieldPlaceholder(
         singleLine = true
     )
 }
+
