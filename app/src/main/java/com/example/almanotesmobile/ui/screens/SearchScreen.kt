@@ -43,19 +43,6 @@ fun SearchScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Search, contentDescription = null, tint = almaRed)
-            Spacer(Modifier.width(8.dp))
-            Text(
-                text = "Cerca appunti",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = almaRed
-            )
-        }
-
-        Spacer(Modifier.height(16.dp))
-
         // 1. Barra di Ricerca
         Card(
             modifier = Modifier
@@ -78,7 +65,7 @@ fun SearchScreen(
                     modifier = Modifier.weight(1f),
                     decorationBox = { innerTextField ->
                         if (searchQuery.isEmpty()) {
-                            Text("Risultato di ricerca", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
+                            Text("Cerca", color = MaterialTheme.colorScheme.onSurfaceVariant, fontSize = 16.sp)
                         }
                         innerTextField()
                     }
