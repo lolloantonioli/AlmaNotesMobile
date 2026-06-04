@@ -17,9 +17,6 @@ interface NoteDao {
     @Query("SELECT * FROM notes WHERE title LIKE '%' || :query || '%' OR professorName LIKE '%' || :query || '%' OR courseName LIKE '%' || :query || '%'")
     fun searchNotes(query: String): Flow<List<Note>>
 
-    @Query("SELECT * FROM notes WHERE downloadCount > 0 ORDER BY uploadedAt DESC")
-    fun getDownloadedNotes(): Flow<List<Note>>
-
     @Query("SELECT * FROM notes WHERE uploaderName = :username ORDER BY uploadedAt DESC")
     fun getNotesByUploader(username: String): Flow<List<Note>>
 
@@ -32,20 +29,11 @@ interface NoteDao {
     @Query("UPDATE notes SET rating = ((rating * ratingCount) + :newRating) / (ratingCount + 1), ratingCount = ratingCount + 1 WHERE id = :id")
     suspend fun updateRating(id: Long, newRating: Int)
 
-    @Query("SELECT COUNT(*) FROM notes")
-    suspend fun count(): Int
-
     @Query("UPDATE notes SET downloadCount = downloadCount + 1 WHERE id = :id")
     suspend fun incrementDownload(id: Long)
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(note: Note): Long
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertAll(notes: List<Note>)
-
-    @Delete
-    suspend fun delete(note: Note)
 
     @Query("SELECT * FROM notes WHERE id IN (:ids) ORDER BY uploadedAt DESC")
     fun getNotesByIds(ids: List<Long>): Flow<List<Note>>
