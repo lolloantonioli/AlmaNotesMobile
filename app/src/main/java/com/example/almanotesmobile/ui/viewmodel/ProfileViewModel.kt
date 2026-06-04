@@ -19,11 +19,14 @@ class ProfileViewModel(
 
 
     // I file che hai caricato
-    val uploadedNotes: StateFlow<List<Note>> = username
+    private val currentUserUploadedNotes: Flow<List<Note>> = username
         .flatMapLatest { u ->
             if (u.isBlank()) flowOf(emptyList())
-            else noteRepository.getNotesByUploader(u).map { it.take(3) }
+            else noteRepository.getNotesByUploader(u)
         }
+
+    val uploadedNotes: StateFlow<List<Note>> = currentUserUploadedNotes
+        .map { it.take(3) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     val uploadedCount: StateFlow<Int> = username
@@ -45,13 +48,24 @@ class ProfileViewModel(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    // I più popolari
-    val topDownloaded: StateFlow<List<Note>> = noteRepository.getTopDownloaded(3)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    // I più popolari tra i file caricati dall'utente corrente
+    val topDownloaded: StateFlow<List<Note>> = currentUserUploadedNotes
+        .map { notes ->
+            notes.sortedWith(
+                compareByDescending<Note> { it.downloadCount }
+                    .thenByDescending { it.uploadedAt }
+            ).take(3)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    //  I fan favourites
-    val topRated: StateFlow<List<Note>> = noteRepository.getTopRated(3)
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
+    //  I fan favourites tra i file caricati dall'utente corrente
+    val topRated: StateFlow<List<Note>> = currentUserUploadedNotes
+        .map { notes ->
+            notes.sortedWith(
+                compareByDescending<Note> { it.rating }
+                    .thenByDescending { it.ratingCount }
+                    .thenByDescending { it.uploadedAt }
+            ).take(3)
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
     // Punti: 1.000 per file caricato + 100 per ogni visualizzazione ricevuta
     val totalPoints: StateFlow<Long> = username
