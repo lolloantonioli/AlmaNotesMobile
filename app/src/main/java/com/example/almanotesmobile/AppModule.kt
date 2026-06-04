@@ -51,7 +51,7 @@ val appModule = module {
     single { get<NoteDatabase>().noteDao() }
     single { NoteRepository(get()) }
     single { AndroidPushNotifier(get<Context>().applicationContext) }
-    single { NotificationRepository(get()) }
+    single { NotificationRepository(get(), get()) }
 
     // ViewModels
     viewModel { HomeViewModel(get()) }

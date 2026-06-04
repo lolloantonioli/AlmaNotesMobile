@@ -51,11 +51,12 @@ class ReviewsViewModel(
                 message = "Hai recensito \"${note?.title ?: "appunto"}\" con $rating stelle."
             )
             val currentUsername = authRepository.username.first()
-            if (note != null && note.uploaderName == currentUsername) {
+            if (note != null && note.uploaderName != currentUsername) {
                 notificationRepository.publish(
                     title = "Nuova recensione ricevuta",
                     message = "Il tuo documento \"${note.title}\" ha ricevuto una recensione da $rating stelle.",
-                    sendPush = true
+                    sendPush = true,
+                    recipientUsername = note.uploaderName
                 )
             }
         }

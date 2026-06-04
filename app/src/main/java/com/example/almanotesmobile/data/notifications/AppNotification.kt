@@ -4,6 +4,7 @@ data class AppNotification(
    val id: Long,
    val title: String,
    val message: String,
+   val recipientUsername: String,
    val createdAt: Long = System.currentTimeMillis(),
    val isPushNotification: Boolean = false
 )

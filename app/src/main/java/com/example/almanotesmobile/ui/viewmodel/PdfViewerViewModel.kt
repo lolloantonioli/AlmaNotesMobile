@@ -108,11 +108,12 @@ class PdfViewerViewModel(
                     message = "Hai scaricato/aperto \"${note.title}\"."
                 )
                 val currentUsername = authRepository.username.first()
-                if (note.uploaderName == currentUsername) {
+                if (note.uploaderName != currentUsername) {
                     notificationRepository.publish(
                         title = "Nuovo download ricevuto",
                         message = "Il tuo documento \"${note.title}\" è stato scaricato.",
-                        sendPush = true
+                        sendPush = true,
+                        recipientUsername = note.uploaderName
                     )
                 }
                 _state.value = PdfViewerState.Ready(pages, note)

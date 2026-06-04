@@ -5,16 +5,39 @@ import com.example.almanotesmobile.data.notifications.AppNotification
 import java.util.concurrent.atomic.AtomicLong
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.flow.SharingStarted
 
 class NotificationRepository(
-    private val pushNotifier: AndroidPushNotifier
+    private val pushNotifier: AndroidPushNotifier,
+    private val authRepository: AuthRepository
 ) {
+    private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
     private val nextNotificationId = AtomicLong(System.currentTimeMillis())
-    private val _notifications = MutableStateFlow<List<AppNotification>>(emptyList())
-    val notifications: StateFlow<List<AppNotification>> = _notifications.asStateFlow()
+    private val allNotifications = MutableStateFlow<List<AppNotification>>(emptyList())
+    val notifications: StateFlow<List<AppNotification>> = combine(
+        allNotifications,
+        authRepository.username
+    ) { notifications, currentUsername ->
+        notifications.filter { notification ->
+            notification.recipientUsername == currentUsername
+        }
+    }.stateIn(repositoryScope, SharingStarted.Eagerly, emptyList())
 
-    fun publish(title: String, message: String, sendPush: Boolean = false) {
+    suspend fun publish(
+        title: String,
+        message: String,
+        sendPush: Boolean = false,
+        recipientUsername: String? = null
+    ) {
+        val targetUsername = recipientUsername ?: authRepository.username.first()
+        if (targetUsername.isBlank()) return
+
         val notificationId = nextNotificationId.incrementAndGet()
         val pushSent = sendPush && pushNotifier.notifyPush(
             notificationId = notificationId.toInt(),
@@ -25,8 +48,9 @@ class NotificationRepository(
             id = notificationId,
             title = title,
             message = message,
+            recipientUsername = targetUsername,
             isPushNotification = pushSent
         )
-        _notifications.value = listOf(notification) + _notifications.value
+        allNotifications.value = listOf(notification) + allNotifications.value
     }
 }
