@@ -9,8 +9,6 @@ import java.net.HttpURLConnection
 import java.net.URL
 
 /** Scarica il PDF nella cartella privata dell'app. */
-
-
 suspend fun downloadPdfToInternalStorage(
     context: Context,
     url: String,
@@ -19,15 +17,15 @@ suspend fun downloadPdfToInternalStorage(
 ): File? = withContext(Dispatchers.IO) {
     try {
         val pdfDir = File(context.filesDir, "pdfs").apply { mkdirs() }
-        val dest   = File(pdfDir, "$noteId.pdf")
+        val dest = File(pdfDir, "$noteId.pdf")
 
         val conn = URL(url).openConnection() as HttpURLConnection
         conn.connectTimeout = 15_000
-        conn.readTimeout    = 30_000
+        conn.readTimeout = 30_000
         conn.connect()
 
         val total = conn.contentLength.toLong()
-        var done  = 0L
+        var done = 0L
 
         conn.inputStream.use { input ->
             FileOutputStream(dest).use { output ->

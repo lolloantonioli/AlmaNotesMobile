@@ -54,17 +54,17 @@ private fun Long.toRelativeTimeString(): String {
     val min  = diff / 60_000; val h = diff / 3_600_000; val d = diff / 86_400_000
     return when {
         diff < 60_000 -> "Adesso"
-        min  < 60     -> "$min minut${if (min  == 1L) "o" else "i"} fa"
-        h    < 24     -> "$h or${if (h == 1L) "a" else "e"} fa"
-        d    < 7      -> "$d giorn${if (d == 1L) "o" else "i"} fa"
-        else          -> "${d / 7} settiman${if (d / 7 == 1L) "a" else "e"} fa"
+        min < 60 -> "$min minut${if (min  == 1L) "o" else "i"} fa"
+        h < 24 -> "$h or${if (h == 1L) "a" else "e"} fa"
+        d < 7 -> "$d giorn${if (d == 1L) "o" else "i"} fa"
+        else -> "${d / 7} settiman${if (d / 7 == 1L) "a" else "e"} fa"
     }
 }
 
 private fun Int.toFormattedCount(): String = when {
     this >= 1_000_000 -> String.format(Locale.ITALIAN, "%.1fM", this / 1_000_000f)
-    this >= 1_000     -> String.format(Locale.ITALIAN, "%.1fk", this / 1_000f)
-    else              -> toString()
+    this >= 1_000 -> String.format(Locale.ITALIAN, "%.1fk", this / 1_000f)
+    else -> toString()
 }
 
 private fun achievementText(points: Long): String {
@@ -84,7 +84,7 @@ private fun achievementText(points: Long): String {
 @Composable
 fun ProfileScreen(
     authViewModel: AuthViewModel,
-    onOpenNote:     (Long) -> Unit,
+    onOpenNote: (Long) -> Unit,
     onShowUploadedNotes: () -> Unit,
     onShowDownloadedNotes: () -> Unit,
     onShowBadges: () -> Unit,
@@ -93,21 +93,21 @@ fun ProfileScreen(
     val almaRed = Color(0xFFBB2E29)
     val context = LocalContext.current
 
-    val username        by authViewModel.username.collectAsStateWithLifecycle()
-    val email           by authViewModel.email.collectAsStateWithLifecycle()
+    val username by authViewModel.username.collectAsStateWithLifecycle()
+    val email by authViewModel.email.collectAsStateWithLifecycle()
     val profileImageUri by authViewModel.profileImageUri.collectAsStateWithLifecycle()
     val password by authViewModel.password.collectAsStateWithLifecycle()
     var showPassword by remember { mutableStateOf(false) }
 
-    val uploadedNotes   by profileViewModel.uploadedNotes.collectAsStateWithLifecycle()
-    val uploadedCount   by profileViewModel.uploadedCount.collectAsStateWithLifecycle()
+    val uploadedNotes by profileViewModel.uploadedNotes.collectAsStateWithLifecycle()
+    val uploadedCount by profileViewModel.uploadedCount.collectAsStateWithLifecycle()
     val downloadedNotes by profileViewModel.downloadedNotes.collectAsStateWithLifecycle()
     val downloadedCount by profileViewModel.downloadedCount.collectAsStateWithLifecycle()
-    val topDownloaded   by profileViewModel.topDownloaded.collectAsStateWithLifecycle()
-    val topRated        by profileViewModel.topRated.collectAsStateWithLifecycle()
-    val totalPoints     by profileViewModel.totalPoints.collectAsStateWithLifecycle()
+    val topDownloaded by profileViewModel.topDownloaded.collectAsStateWithLifecycle()
+    val topRated by profileViewModel.topRated.collectAsStateWithLifecycle()
+    val totalPoints by profileViewModel.totalPoints.collectAsStateWithLifecycle()
 
-    var selectedNote          by remember { mutableStateOf<Note?>(null) }
+    var selectedNote by remember { mutableStateOf<Note?>(null) }
     var showImageSourceDialog by remember { mutableStateOf(false) }
 
     // Camera
@@ -280,12 +280,12 @@ fun ProfileScreen(
         // Logout
         item {
             Button(
-                onClick   = {
+                onClick = {
                     authViewModel.logout()
                 },
-                modifier  = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),
-                colors    = ButtonDefaults.buttonColors(containerColor = almaRed),
-                shape     = RoundedCornerShape(12.dp)
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(52.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = almaRed),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Icon(Icons.Default.ExitToApp, null)
                 Spacer(Modifier.width(8.dp))
@@ -298,7 +298,7 @@ fun ProfileScreen(
     // Dialog nota
     selectedNote?.let { note ->
         NoteDetailDialog(
-            note      = note,
+            note = note,
             onDismiss = { selectedNote = null },
             onDownload = { selectedNote = null; onOpenNote(note.id) }
         )
@@ -309,7 +309,7 @@ fun ProfileScreen(
         AlertDialog(
             onDismissRequest = { showImageSourceDialog = false },
             title = { Text("Foto Profilo", fontWeight = FontWeight.Bold) },
-            text  = { Text("Scegli come inserire la tua foto:") },
+            text = { Text("Scegli come inserire la tua foto:") },
             confirmButton = {
                 Button(onClick = { showImageSourceDialog = false; galleryLauncher.launch("image/*") },
                     colors = ButtonDefaults.buttonColors(almaRed)) { Text("Galleria") }
@@ -327,9 +327,9 @@ fun ProfileScreen(
 
 @Composable
 private fun ProfileSectionHeader(
-    icon:     ImageVector,
-    title:    String,
-    count:    Int?,
+    icon: ImageVector,
+    title: String,
+    count: Int?,
     showVedi: Boolean,
     modifier: Modifier = Modifier,
     onVediClick: () -> Unit = {}
@@ -339,19 +339,19 @@ private fun ProfileSectionHeader(
         Icon(icon, null, tint = almaRed, modifier = Modifier.size(20.dp))
         Spacer(Modifier.width(8.dp))
         Text(
-            text     = if (count != null) "$title ($count)" else title,
+            text = if (count != null) "$title ($count)" else title,
             fontWeight = FontWeight.Bold,
             fontSize = 16.sp,
-            color    = almaRed,
+            color = almaRed,
             modifier = Modifier.weight(1f)
         )
         if (showVedi) {
             OutlinedButton(
-                onClick        = onVediClick,
-                shape          = RoundedCornerShape(8.dp),
-                border         = androidx.compose.foundation.BorderStroke(1.dp, almaRed),
+                onClick = onVediClick,
+                shape  = RoundedCornerShape(8.dp),
+                border = androidx.compose.foundation.BorderStroke(1.dp, almaRed),
                 contentPadding = PaddingValues(horizontal = 12.dp, vertical = 0.dp),
-                modifier       = Modifier.height(30.dp)
+                modifier = Modifier.height(30.dp)
             ) { Text("Vedi", color = almaRed, fontSize = 12.sp) }
         }
     }
@@ -361,9 +361,9 @@ private fun ProfileSectionHeader(
 
 @Composable
 private fun ProfileNoteCard(
-    notes:    List<Note>,
+    notes: List<Note>,
     modifier: Modifier = Modifier,
-    row:      @Composable (Note) -> Unit
+    row: @Composable (Note) -> Unit
 ) {
     Card(modifier = modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface), elevation = CardDefaults.cardElevation(2.dp)) {

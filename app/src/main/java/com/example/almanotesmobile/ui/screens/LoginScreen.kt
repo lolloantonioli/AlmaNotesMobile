@@ -29,7 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.almanotesmobile.R
 import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 
-// Funzione helper per trovare la FragmentActivity nel contesto di Compose
+// Funzione per trovare la FragmentActivity nel contesto di Compose
 fun Context.findFragmentActivity(): FragmentActivity? {
     var currentContext = this
     while (currentContext is ContextWrapper) {
@@ -43,7 +43,6 @@ fun Context.findFragmentActivity(): FragmentActivity? {
 fun LoginScreen(
     onLoginSuccess: () -> Unit,
     onNavigateToRegister: () -> Unit,
-    onBiometricLogin: () -> Unit,
     viewModel: AuthViewModel
 ) {
     var email          by remember { mutableStateOf("") }

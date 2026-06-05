@@ -36,10 +36,10 @@ fun NoteDetailDialog(
     onDismiss: () -> Unit,
     onDownload: () -> Unit
 ) {
-    val almaRed   = Color(0xFFBB2E29)
-    val goldStar  = Color(0xFFFFB800)
+    val almaRed = Color(0xFFBB2E29)
+    val goldStar = Color(0xFFFFB800)
     val labelGray = MaterialTheme.colorScheme.onSurfaceVariant
-    val bgGray    = MaterialTheme.colorScheme.surfaceVariant
+    val bgGray = MaterialTheme.colorScheme.surfaceVariant
 
     Dialog(
         onDismissRequest = onDismiss,

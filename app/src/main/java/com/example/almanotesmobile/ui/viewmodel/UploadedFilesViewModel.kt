@@ -17,7 +17,6 @@ class UploadedFilesViewModel(
     private val noteRepository: NoteRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
-
     val uploadedNotes: StateFlow<List<Note>> = authRepository.username
         .flatMapLatest { username ->
             if (username.isBlank()) flowOf(emptyList())

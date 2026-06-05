@@ -1,7 +1,9 @@
 package com.example.almanotesmobile.ui.screens
 
 import android.graphics.Bitmap
+import android.os.Build
 import android.widget.Toast
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -30,6 +32,7 @@ import com.example.almanotesmobile.ui.viewmodel.PdfViewerViewModel
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
+@RequiresApi(Build.VERSION_CODES.Q)
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PdfViewerScreen(
@@ -96,11 +99,11 @@ fun PdfViewerScreen(
                 .background(MaterialTheme.colorScheme.background)
         ) {
             when (val s = state) {
-                is PdfViewerState.Loading      -> PdfLoading("Caricamento…", null)
-                is PdfViewerState.Downloading  -> PdfLoading("Scaricamento… ${s.progress}%", s.progress / 100f)
-                is PdfViewerState.Rendering    -> PdfLoading("Elaborazione… ${s.progress}%", s.progress / 100f)
-                is PdfViewerState.Ready        -> PdfPages(s.pages)
-                is PdfViewerState.Error        -> PdfError(s.message) {
+                is PdfViewerState.Loading -> PdfLoading("Caricamento…", null)
+                is PdfViewerState.Downloading -> PdfLoading("Scaricamento… ${s.progress}%", s.progress / 100f)
+                is PdfViewerState.Rendering -> PdfLoading("Elaborazione… ${s.progress}%", s.progress / 100f)
+                is PdfViewerState.Ready -> PdfPages(s.pages)
+                is PdfViewerState.Error -> PdfError(s.message) {
                     viewModel.load(noteId, context)
                 }
             }

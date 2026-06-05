@@ -8,7 +8,10 @@ import java.io.FileOutputStream
 fun saveImageToInternalStorage(context: Context, uri: Uri): String? {
     return try {
         val inputStream = context.contentResolver.openInputStream(uri)
-        val file = File(context.filesDir, "profile_image_${System.currentTimeMillis()}.jpg")
+        val file = File(
+            context.filesDir,
+            "profile_image_${System.currentTimeMillis()}.jpg"
+        )
         val outputStream = FileOutputStream(file)
 
         inputStream?.use { input ->

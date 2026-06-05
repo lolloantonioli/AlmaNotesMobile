@@ -42,7 +42,7 @@ fun SearchScreen(
             .background(MaterialTheme.colorScheme.background)
             .padding(16.dp)
     ) {
-        // 1. Barra di Ricerca
+        // Barra di Ricerca
         Card(
             modifier = Modifier
                 .fillMaxWidth(),
@@ -74,7 +74,7 @@ fun SearchScreen(
 
         Spacer(Modifier.height(16.dp))
 
-        // 2. Lista Risultati
+        // Lista Risultati
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(12.dp)

@@ -27,6 +27,7 @@ import android.content.ContentValues
 import android.os.Build
 import android.provider.MediaStore
 import androidx.annotation.RequiresApi
+import androidx.core.graphics.createBitmap
 
 
 sealed class PdfViewerState {
@@ -55,7 +56,7 @@ class PdfViewerViewModel(
                 return@launch
             }
 
-            // 1. Controlliamo se il file esiste già localmente
+            // Controlliamo se il file esiste già localmente
             val localFile = File(note.filePath)
             val pdfFile = if (localFile.exists() && localFile.isFile) {
                 localFile
@@ -137,10 +138,8 @@ class PdfViewerViewModel(
             val values = ContentValues().apply {
                 put(MediaStore.Downloads.DISPLAY_NAME, fileName)
                 put(MediaStore.Downloads.MIME_TYPE, "application/pdf")
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    put(MediaStore.Downloads.RELATIVE_PATH, "Download/AlmaNotes")
-                    put(MediaStore.Downloads.IS_PENDING, 1)
-                }
+                put(MediaStore.Downloads.RELATIVE_PATH, "Download/AlmaNotes")
+                put(MediaStore.Downloads.IS_PENDING, 1)
             }
 
             val uri = resolver.insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, values) ?: return@withContext false
@@ -151,10 +150,8 @@ class PdfViewerViewModel(
                 }
             } ?: return@withContext false
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                val complete = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
-                resolver.update(uri, complete, null, null)
-            }
+            val complete = ContentValues().apply { put(MediaStore.Downloads.IS_PENDING, 0) }
+            resolver.update(uri, complete, null, null)
 
             val downloadedCount = authRepository.markNoteAsDownloaded(noteId)
             publishCountBadgesIfNew(
@@ -173,17 +170,16 @@ class PdfViewerViewModel(
         onProgress: (Int) -> Unit
     ): List<Bitmap>? = withContext(Dispatchers.Default) {
         try {
-            val fd       = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
+            val fd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY)
             val renderer = PdfRenderer(fd)
-            val pages    = mutableListOf<Bitmap>()
+            val pages = mutableListOf<Bitmap>()
 
             for (i in 0 until renderer.pageCount) {
-                val page  = renderer.openPage(i)
+                val page = renderer.openPage(i)
                 val scale = 1080f / page.width
-                val bmp   = Bitmap.createBitmap(
-                    (page.width  * scale).toInt(),
-                    (page.height * scale).toInt(),
-                    Bitmap.Config.ARGB_8888
+                val bmp = createBitmap(
+                    (page.width * scale).toInt(),
+                    (page.height * scale).toInt()
                 ).also { it.eraseColor(Color.WHITE) }
 
                 page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)

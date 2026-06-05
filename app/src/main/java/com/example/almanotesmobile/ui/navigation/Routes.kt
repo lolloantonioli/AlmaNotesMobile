@@ -4,16 +4,10 @@ import kotlinx.serialization.Serializable
 
 sealed interface Route {
     @Serializable
-    data object AuthGraph : Route
-
-    @Serializable
     data object Registration : Route
 
     @Serializable
     data object Login : Route
-
-    @Serializable
-    data object MainGraph : Route
 
     @Serializable
     data object Home : Route
@@ -23,9 +17,6 @@ sealed interface Route {
 
     @Serializable
     data object Upload : Route
-
-    @Serializable
-    data object Favourites : Route
 
     @Serializable
     data object Reviews : Route

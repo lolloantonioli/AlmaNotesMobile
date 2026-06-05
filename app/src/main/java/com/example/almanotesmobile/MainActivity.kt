@@ -27,6 +27,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.core.content.ContextCompat
 import com.example.almanotesmobile.ui.viewmodel.AuthViewModel
 import com.example.almanotesmobile.ui.viewmodel.ThemeViewModel
@@ -36,6 +37,7 @@ class MainActivity : FragmentActivity() {
         ActivityResultContracts.RequestPermission()
     ) { }
 
+    @RequiresApi(Build.VERSION_CODES.Q)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         requestNotificationPermissionIfNeeded()
@@ -118,7 +120,6 @@ class MainActivity : FragmentActivity() {
                                     }
                                 },
                                 onNavigateToRegister = { navController.navigate(Route.Registration) },
-                                onBiometricLogin = { /* TODO */ },
                                 viewModel = authViewModel
                             )
                         }

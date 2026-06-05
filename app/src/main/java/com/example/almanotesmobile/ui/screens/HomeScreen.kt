@@ -41,21 +41,21 @@ import java.util.Locale
 
 private fun Int.toFormattedCount(): String = when {
     this >= 1_000_000 -> String.format(Locale.ITALIAN, "%.1fM", this / 1_000_000f)
-    this >= 1_000     -> String.format(Locale.ITALIAN, "%.1fk", this / 1_000f)
-    else              -> toString()
+    this >= 1_000 -> String.format(Locale.ITALIAN, "%.1fk", this / 1_000f)
+    else -> toString()
 }
 
 private fun Long.toRelativeTimeString(): String {
-    val diff    = System.currentTimeMillis() - this
+    val diff = System.currentTimeMillis() - this
     val minutes = diff / 60_000
-    val hours   = diff / 3_600_000
-    val days    = diff / 86_400_000
+    val hours = diff / 3_600_000
+    val days = diff / 86_400_000
     return when {
-        diff    <  60_000       -> "Adesso"
-        minutes <  60           -> "$minutes minut${if (minutes == 1L) "o" else "i"} fa"
-        hours   <  24           -> "$hours or${if (hours == 1L) "a" else "e"} fa"
-        days    <   7           -> "$days giorn${if (days == 1L) "o" else "i"} fa"
-        else                    -> "${days / 7} settiman${if (days / 7 == 1L) "a" else "e"} fa"
+        diff < 60_000 -> "Adesso"
+        minutes < 60 -> "$minutes minut${if (minutes == 1L) "o" else "i"} fa"
+        hours < 24 -> "$hours or${if (hours == 1L) "a" else "e"} fa"
+        days < 7 -> "$days giorn${if (days == 1L) "o" else "i"} fa"
+        else -> "${days / 7} settiman${if (days / 7 == 1L) "a" else "e"} fa"
     }
 }
 
@@ -128,8 +128,6 @@ fun HomeScreen(
 @Composable
 private fun HeroSection(onSearchClick: () -> Unit) {
     val almaRed = Color(0xFFBB2E29)
-
-
 
     // Overlay scuro opzionale
     Box(

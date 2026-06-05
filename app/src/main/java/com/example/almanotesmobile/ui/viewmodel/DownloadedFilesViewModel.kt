@@ -24,5 +24,4 @@ class DownloadedFilesViewModel(
             else noteRepository.getNotesByIds(ids)
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
-
 }

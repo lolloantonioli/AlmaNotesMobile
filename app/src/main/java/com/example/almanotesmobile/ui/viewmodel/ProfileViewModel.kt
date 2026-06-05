@@ -13,10 +13,7 @@ class ProfileViewModel(
     private val noteRepository: NoteRepository,
     private val authRepository: AuthRepository
 ) : ViewModel() {
-
-
     private val username: Flow<String> = authRepository.username
-
 
     // I file che hai caricato
     private val currentUserUploadedNotes: Flow<List<Note>> = username

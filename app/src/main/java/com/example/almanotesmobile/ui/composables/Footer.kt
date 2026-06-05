@@ -1,8 +1,6 @@
 package com.example.almanotesmobile.ui.composables
 
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -20,7 +18,7 @@ fun AlmaNotesFooter(navController: NavController) {
     val currentDestination = navBackStackEntry?.destination
 
     NavigationBar {
-        // 1. HOME
+        // HOME
         NavigationBarItem(
             icon = { Icon(
                 painter = painterResource(id = R.drawable.img),
@@ -38,7 +36,7 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 2. CERCA
+        // CERCA
         NavigationBarItem(
             icon = {
                 Icon(
@@ -57,7 +55,7 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 3. CARICA (+)
+        // CARICA
         NavigationBarItem(
             icon = {
                 Icon(
@@ -76,7 +74,7 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 4. RECENSIONI
+        // RECENSIONI
         NavigationBarItem(
             icon = {
                 Icon(
@@ -95,7 +93,7 @@ fun AlmaNotesFooter(navController: NavController) {
             }
         )
 
-        // 5. PROFILO
+        // PROFILO
         NavigationBarItem(
             icon = {
                 Icon(

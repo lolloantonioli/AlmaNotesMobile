@@ -65,7 +65,10 @@ class UploadViewModel(
         return withContext(Dispatchers.IO) {
             try {
                 val inputStream = context.contentResolver.openInputStream(uri)
-                val file = File(context.filesDir, "${fileName.replace(" ", "_")}_${System.currentTimeMillis()}.pdf")
+                val file = File(
+                    context.filesDir,
+                    "${fileName.replace(" ", "_")}_${System.currentTimeMillis()}.pdf"
+                )
                 val outputStream = FileOutputStream(file)
                 inputStream?.use { input ->
                     outputStream.use { output ->
