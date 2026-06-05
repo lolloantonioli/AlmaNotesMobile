@@ -70,12 +70,12 @@ private fun Int.toFormattedCount(): String = when {
 private fun achievementText(points: Long): String {
     val fmt = NumberFormat.getNumberInstance(Locale("it", "IT")).format(points)
     return when {
-        points == 0L        -> "Carica il tuo primo appunto per guadagnare punti!"
-        points < 1_000L     -> "Hai $fmt punti, sei agli inizi!"
-        points < 10_000L    -> "Hai $fmt punti, continua così!"
-        points < 100_000L   -> "Hai $fmt punti, ottimo lavoro!"
-        points < 500_000L   -> "Hai $fmt punti, stai diventando popolare!"
-        else                -> "Hai $fmt punti, sei figo!"
+        points == 0L-> "Carica il tuo primo appunto per guadagnare punti!"
+        points < 1_000L-> "Hai $fmt punti, sei agli inizi!"
+        points < 10_000L-> "Hai $fmt punti, continua così!"
+        points < 100_000L-> "Hai $fmt punti, ottimo lavoro!"
+        points < 500_000L-> "Hai $fmt punti, stai diventando popolare!"
+        else-> "Hai $fmt punti, sei figo!"
     }
 }
 
@@ -121,7 +121,7 @@ fun ProfileScreen(
     }
     val startCamera = {
         try {
-            val f   = File(File(context.cacheDir, "images").apply { mkdirs() }, "profile_temp.jpg")
+            val f = File(File(context.cacheDir, "images").apply { mkdirs() }, "profile_temp.jpg")
             val uri = FileProvider.getUriForFile(context, "${context.packageName}.provider", f)
             tempImageUri = uri; cameraLauncher.launch(uri)
         } catch (e: Exception) { Toast.makeText(context, "Errore: ${e.message}", Toast.LENGTH_LONG).show() }
@@ -156,9 +156,9 @@ fun ProfileScreen(
         //Card credenziali
         item {
             Card(
-                modifier  = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-                shape     = RoundedCornerShape(16.dp),
-                colors    = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(4.dp)
             ) {
                 Row(modifier = Modifier.padding(20.dp), verticalAlignment = Alignment.CenterVertically) {

@@ -92,7 +92,7 @@ class PdfViewerViewModel(
             if (pages == null) {
                 _state.value = PdfViewerState.Error("Impossibile aprire il file PDF")
             } else {
-                // Conteggiamo l'apertura come un download/visualizzazione
+                // Conteggiamo l'apertura come un download
 
                 repository.incrementDownload(noteId)
 
@@ -105,7 +105,7 @@ class PdfViewerViewModel(
                 )
                 notificationRepository.publish(
                     title = "Download registrato",
-                    message = "Hai scaricato/aperto \"${note.title}\"."
+                    message = "Hai scaricato \"${note.title}\"."
                 )
                 val currentUsername = authRepository.username.first()
                 if (note.uploaderName != currentUsername) {
@@ -179,12 +179,12 @@ class PdfViewerViewModel(
 
             for (i in 0 until renderer.pageCount) {
                 val page  = renderer.openPage(i)
-                val scale = 1080f / page.width          // target ~1080px per la qualità
+                val scale = 1080f / page.width
                 val bmp   = Bitmap.createBitmap(
                     (page.width  * scale).toInt(),
                     (page.height * scale).toInt(),
                     Bitmap.Config.ARGB_8888
-                ).also { it.eraseColor(Color.WHITE) }   // sfondo bianco
+                ).also { it.eraseColor(Color.WHITE) }
 
                 page.render(bmp, null, null, PdfRenderer.Page.RENDER_MODE_FOR_DISPLAY)
                 page.close()

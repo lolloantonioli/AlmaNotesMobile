@@ -11,7 +11,7 @@ import kotlinx.coroutines.flow.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProfileViewModel(
     private val noteRepository: NoteRepository,
-    private val authRepository: AuthRepository   // iniettato direttamente
+    private val authRepository: AuthRepository
 ) : ViewModel() {
 
 
@@ -36,7 +36,7 @@ class ProfileViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    //  I file che hai scaricato con l'account corrente
+    //  I file che hai scaricato con l'account
     val downloadedNotes: StateFlow<List<Note>> = authRepository.downloadedNoteIds
         .flatMapLatest { ids ->
             if (ids.isEmpty()) flowOf(emptyList())
@@ -48,7 +48,7 @@ class ProfileViewModel(
         .map { it.size }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), 0)
 
-    // I più popolari tra i file caricati dall'utente corrente
+    // I più popolari tra i file caricati dall'utente
     val topDownloaded: StateFlow<List<Note>> = currentUserUploadedNotes
         .map { notes ->
             notes.sortedWith(
@@ -57,7 +57,7 @@ class ProfileViewModel(
             ).take(3)
         }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
-    //  I fan favourites tra i file caricati dall'utente corrente
+    //  I fan favourites tra i file caricati dall'utente
     val topRated: StateFlow<List<Note>> = currentUserUploadedNotes
         .map { notes ->
             notes.sortedWith(

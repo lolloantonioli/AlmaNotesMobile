@@ -67,11 +67,11 @@ fun UploadScreen(
     }
 
     fun launchFilePicker() {
-        // Su Android 13+ (Tiramisu) non serve/non si può chiedere READ_EXTERNAL_STORAGE per i documenti
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             filePickerLauncher.launch(arrayOf("application/pdf"))
         } else {
-            // Logica in stile fotocamera per Android 12 e inferiori
+
             if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
                 filePickerLauncher.launch(arrayOf("application/pdf"))
             } else {

@@ -34,7 +34,6 @@ fun ThemeScreen(
     themeActions: ThemeActions
 ) {
     val backgroundColor = MaterialTheme.colorScheme.background
-    // Definiamo il colore "AlmaNotes" per gli accenti (titolo, icona, ecc.)
     val almaRed = Color(0xFFBB2E29)
 
     Scaffold(
@@ -73,7 +72,7 @@ fun ThemeScreen(
                 Spacer(modifier = Modifier.weight(1f))
             }
 
-            // Gruppo di Radio Button STANDARD
+            // Gruppo di Radio Button
             Column(modifier = Modifier.selectableGroup()) {
                 Theme.entries.forEach { theme ->
                     RadioListItem(

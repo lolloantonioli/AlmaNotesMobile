@@ -25,9 +25,6 @@ class AuthViewModel(
     val biometricEnabled: StateFlow<Boolean> = repository.biometricEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
-    val biometricConsentAsked: StateFlow<Boolean> = repository.biometricConsentAsked
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
-
     val username: StateFlow<String> = repository.username
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "")
 

@@ -32,7 +32,6 @@ fun SearchScreen(
 ) {
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
-    val almaRed = Color(0xFFBB2E29)
 
     // Stato per gestire la nota selezionata e mostrare il dialog
     var selectedNote by remember { mutableStateOf<Note?>(null) }
@@ -86,7 +85,7 @@ fun SearchScreen(
         }
     }
 
-    // Dialog di dettaglio (uguale a quello della HomeScreen)
+    // Dialog di dettaglio
     selectedNote?.let { note ->
         NoteDetailDialog(
             note = note,
