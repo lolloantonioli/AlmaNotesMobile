@@ -103,12 +103,18 @@ class AuthRepository(private val dataStore: DataStore<Preferences>) {
     }
 
     suspend fun loginWithBiometric(): Boolean {
-        var isReg = false
-        dataStore.edit { prefs ->
-            isReg = prefs[Keys.IS_REGISTERED] ?: false
-            if (isReg) prefs[Keys.IS_LOGGED_IN] = true
+        return try {
+            var isReg = false
+            dataStore.edit { prefs ->
+                // Controlla sia legacy che multi-account (uguale alla Flow isRegistered)
+                isReg = (prefs[Keys.IS_REGISTERED] ?: false)
+                        || prefs[Keys.REGISTERED_ACCOUNTS].orEmpty().isNotEmpty()
+                if (isReg) prefs[Keys.IS_LOGGED_IN] = true
+            }
+            isReg
+        } catch (e: Exception) {
+            false
         }
-        return isReg
     }
 
     suspend fun logout() {

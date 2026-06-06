@@ -54,13 +54,15 @@ class AuthViewModel(
         }
     }
 
-
     fun loginWithBiometric(onResult: (Boolean) -> Unit) {
         viewModelScope.launch {
             val success = repository.loginWithBiometric()
             onResult(success)
         }
     }
+
+    val biometricConsentAsked: StateFlow<Boolean> = repository.biometricConsentAsked
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
     fun setBiometricEnabled(enabled: Boolean) {
         viewModelScope.launch { repository.setBiometricEnabled(enabled) }

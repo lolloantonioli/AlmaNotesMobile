@@ -45,9 +45,11 @@ fun LoginScreen(
     onNavigateToRegister: () -> Unit,
     viewModel: AuthViewModel
 ) {
-    var email          by remember { mutableStateOf("") }
-    var password       by remember { mutableStateOf("") }
-    var errorMessage   by remember { mutableStateOf<String?>(null) }
+    var email by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+    val biometricConsentAsked by viewModel.biometricConsentAsked.collectAsStateWithLifecycle()
+    var showBiometricDialog by remember { mutableStateOf(false) }
 
     val biometricEnabled by viewModel.biometricEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -114,10 +116,11 @@ fun LoginScreen(
 
 
     fun handlePasswordLoginSuccess() {
-        if (biometricAvailable && !biometricEnabled) {
-            viewModel.setBiometricEnabled(true)
+        if (biometricAvailable && !biometricEnabled && !biometricConsentAsked) {
+            showBiometricDialog = true  // mostra il dialog prima di navigare
+        } else {
+            onLoginSuccess()
         }
-        onLoginSuccess()
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -230,6 +233,27 @@ fun LoginScreen(
                     }
                 }
             }
+        }
+        if (showBiometricDialog) {
+            AlertDialog(
+                onDismissRequest = { showBiometricDialog = false; onLoginSuccess() },
+                title = { Text("Accesso rapido") },
+                text  = { Text("Vuoi abilitare l'accesso con impronta digitale o PIN?") },
+                confirmButton = {
+                    TextButton(onClick = {
+                        viewModel.setBiometricEnabled(true)
+                        showBiometricDialog = false
+                        onLoginSuccess()
+                    }) { Text("Abilita") }
+                },
+                dismissButton = {
+                    TextButton(onClick = {
+                        viewModel.setBiometricEnabled(false) // salva anche biometricConsentAsked=true
+                        showBiometricDialog = false
+                        onLoginSuccess()
+                    }) { Text("No grazie") }
+                }
+            )
         }
     }
 }

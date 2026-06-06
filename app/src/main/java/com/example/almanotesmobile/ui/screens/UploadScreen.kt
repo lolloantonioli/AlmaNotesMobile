@@ -56,29 +56,10 @@ fun UploadScreen(
         contract = ActivityResultContracts.OpenDocument()
     ) { uri: Uri? -> selectedFileUri = uri }
 
-    val filePermissionLauncher = rememberLauncherForActivityResult(
-        contract = ActivityResultContracts.RequestPermission()
-    ) { isGranted ->
-        if (isGranted) {
-            filePickerLauncher.launch(arrayOf("application/pdf"))
-        } else {
-            Toast.makeText(context, "Permesso negato", Toast.LENGTH_SHORT).show()
-        }
-    }
-
     fun launchFilePicker() {
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            filePickerLauncher.launch(arrayOf("application/pdf"))
-        } else {
-
-            if (ContextCompat.checkSelfPermission(context, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED) {
-                filePickerLauncher.launch(arrayOf("application/pdf"))
-            } else {
-                filePermissionLauncher.launch(Manifest.permission.READ_EXTERNAL_STORAGE)
-            }
-        }
+        filePickerLauncher.launch(arrayOf("application/pdf"))
     }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Image(
             painter = painterResource(id = R.drawable.sfondo),
